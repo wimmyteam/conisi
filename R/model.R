@@ -1,0 +1,371 @@
+# Dependencies: deSolve, dplyr, tibble
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Description: This scripts contains functions used for running the
+# COVID-19 models
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#'
+#'  Runs the conisi COVID-19 model
+#'
+#' Solves the system of differential equations that make up the conisi model
+#' using the parameters and arguments provided.
+#'
+#' @param parm_table A data frame containing the time-varying parameters (in long format).
+#' @param pop_size Integer The size of the population being modelled.
+#' @param num_days Integer How many days to run the simulation for.
+#'
+#' @return A data frame with the values of the various compartments over time
+#'
+#' @importFrom magrittr %>%
+#' @export
+#'
+COVIDmodel <- function(parm_table, pop_size, num_days){
+  # library(tidyverse)
+  # library(deSolve)
+
+  # Named vector containing, starting populations for compartments
+  y <- c(S = pop_size - 10,
+         E_u = 10,  # Number of seeds (people assumed to have entered the country with SARS-CoV-2 infection)
+         I_1u = 0,
+         I_2u = 0,
+         I_mu = 0,
+         I_su = 0,
+         R_2u = 0,
+         R_mu = 0,
+         E_d = 0,
+         I_1d = 0,
+         I_2d = 0,
+         I_md = 0,
+         I_sd = 0,
+         R_2d = 0,
+         R_md = 0,
+         H = 0,
+         R_h = 0,
+         C = 0,
+         P = 0,
+         R_c = 0,
+         D_s = 0,
+         D_h = 0,
+         D_c = 0,
+         ConfirmedCases = 0,
+         ContribAll = 0,
+         ContribNonSympt = 0,
+         eta_d_cumul_flow = 0,
+         eta_u_cumul_flow = 0,
+         r_h_cumul_flow = 0,
+         delta_h_cumul_flow = 0,
+         theta_cumul_flow = 0)
+
+  model <- function(t, y, parms){
+
+    parms <- parm_table %>%
+      dplyr::filter((start_time <= t | is.na(start_time))& (t < end_time | is.na(end_time))) %>%
+      dplyr::select(parameter_name, value) %>%
+      tibble::deframe()
+
+    with(as.list(c(y, parms)),{
+
+
+      b_a <- 0 # seasonality amplitude                  # Fix to zero, i.e. no longer a parameter
+      b_c <- 0 # seasonality shift                      # Fix to zero, i.e. no longer a parameter
+      c_e1d <- c_e1u                                    # Set equal to c_e1u, i.e. no longer a parameter
+      c_12d <- c_12u                                    # Set equal to c_12u, i.e. no longer a parameter
+      c_1md <- c_1mu                                    # Set equal to c_1mu, i.e. no longer a parameter
+      c_1sd <- c_1su                                    # Set equal to c_1su, i.e. no longer a parameter
+      eta_d <- eta_u                                    # Set equal to eta_u, i.e. no longer a parameter
+      delta_sd <- delta_su                              # Set equal to delta_su, i.e. no longer a parameter
+      r_2d <- r_2u                                      # Set equal to r_2u, i.e. no longer a parameter
+      r_md <- r_mu                                      # Set equal to r_mu, i.e. no longer a parameter
+      d_e <- 0                                          # Fix to zero, i.e. no longer a parameter
+
+      hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
+      ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
+
+      S_f_E_u <- function(){
+        beta <- a_1u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1u * S / pop_size +
+          a_2u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2u * S / pop_size +
+          1 * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_mu * S / pop_size +
+          a_su * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_su * S / pop_size +
+          a_1d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1d * S / pop_size +
+          a_2d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2d * S / pop_size +
+          a_md * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_md * S / pop_size +
+          a_sd * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_sd * S / pop_size
+
+        return (beta * FOIadjust)
+      }
+
+      ContribNonSympt <- function(){
+        betaNS <- a_1u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1u * S / pop_size +
+          a_2u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2u * S / pop_size +
+          a_1d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1d * S / pop_size +
+          a_2d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2d * S / pop_size
+
+        return(betaNS * FOIadjust)
+
+      }
+
+      E_u_f_I_1u <- function(){
+
+
+        c_e1u * E_u
+
+      }
+
+      E_u_f_E_d <- function(){
+
+        d_e * E_u
+
+      }
+
+      I_1u_f_I_2u <- function(){
+
+        c_12u * I_1u
+
+      }
+
+      I_1u_f_I_mu <- function(){
+
+        c_1mu * I_1u
+
+      }
+
+      I_1u_f_I_su <- function(){
+
+        c_1su * I_1u
+
+      }
+
+      I_1u_f_I_1d <- function(){
+
+        d_1 * I_1u
+
+      }
+
+      I_2u_f_R_2u <- function(){
+
+        r_2u * I_2u
+
+      }
+
+      I_2u_f_I_2d <- function(){
+
+        d_2 * I_2u
+
+      }
+
+      I_mu_f_R_mu <- function(){
+
+        r_mu * I_mu
+
+      }
+
+      I_mu_f_I_md <- function(){
+
+        d_m * I_mu
+
+      }
+
+      I_su_f_D_s <- function(){
+
+        eta_u_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
+        (delta_su + (eta_u - eta_u_eff)) * I_su
+
+      }
+
+      I_su_f_H <- function(){
+
+        eta_u_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil) # The effective rate, taking into account the ceiling v
+        eta_u_eff * I_su
+
+      }
+
+      I_su_f_I_sd <- function(){
+
+        d_s * I_su
+
+      }
+
+      E_d_f_I_1d <- function(){
+
+        c_e1d * E_d
+
+      }
+
+      I_1d_f_I_2d <- function(){
+
+        c_12d * I_1d
+
+      }
+
+      I_1d_f_I_md <- function(){
+
+        c_1md * I_1d
+
+      }
+
+      I_1d_f_I_sd <- function(){
+
+        c_1sd * I_1d
+
+      }
+
+      I_2d_f_R_2d <- function(){
+
+        r_2d * I_2d
+
+      }
+
+      I_md_f_R_md <- function(){
+
+        r_md * I_md
+
+      }
+
+      I_sd_f_D_s <- function(){
+
+        eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
+
+        (delta_sd + (eta_d - eta_d_eff)) * I_sd
+
+      }
+
+      I_sd_f_H <- function(){
+
+        eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil) # The effective rate, taking into account the ceiling v
+
+        eta_d_eff * I_sd
+
+      }
+
+      H_f_R_h <- function(){
+
+        r_h * H
+
+      }
+
+      H_f_D_h <- function(){
+
+        delta_h <- delta_h * delta_h_adjust
+
+        theta_eff <- theta * (C < c_ceil) + (theta * exp(500 * (1 - C / c_ceil))) * (C >= c_ceil)
+
+        (delta_h + (theta - theta_eff)) * H
+
+      }
+
+      H_f_C <- function(){
+
+        theta_eff <- theta * (C < c_ceil) + (theta * exp(500 * (1 - C / c_ceil))) * (C >= c_ceil) # The effective rate, taking into account the ceiling w
+
+        theta_eff * H
+
+      }
+
+      C_f_P <- function(){
+
+        rho * C
+
+      }
+
+      C_f_D_c <- function(){
+
+        delta_c <- delta_c * delta_h_adjust
+
+        delta_c * C
+
+      }
+
+      P_f_R_c <- function(){
+
+        r_p * P
+
+      }
+
+
+      # Defining the system of differential equations
+      dS <- -S_f_E_u()
+      dE_u <- -E_u_f_I_1u() - E_u_f_E_d() + S_f_E_u()
+      dI_1u <- -I_1u_f_I_2u() - I_1u_f_I_mu() - I_1u_f_I_su() - I_1u_f_I_1d() + E_u_f_I_1u()
+      dI_2u <- -I_2u_f_R_2u() - I_2u_f_I_2d() + I_1u_f_I_2u()
+      dI_mu <- -I_mu_f_R_mu() - I_mu_f_I_md() + I_1u_f_I_mu()
+      dI_su <- -I_su_f_D_s() - I_su_f_H() - I_su_f_I_sd() + I_1u_f_I_su()
+      dR_2u <- I_2u_f_R_2u()
+      dR_mu <- I_mu_f_R_mu()
+
+      dE_d <- -E_d_f_I_1d() + E_u_f_E_d()
+      dI_1d <- -I_1d_f_I_2d() - I_1d_f_I_md() - I_1d_f_I_sd() + I_1u_f_I_1d() + E_d_f_I_1d()
+      dI_2d <- -I_2d_f_R_2d() + I_2u_f_I_2d() + I_1d_f_I_2d()
+      dI_md <- -I_md_f_R_md() + I_mu_f_I_md() + I_1d_f_I_md()
+      dI_sd <- -I_sd_f_D_s() - I_sd_f_H() + I_su_f_I_sd() + I_1d_f_I_sd()
+      dR_2d <- I_2d_f_R_2d()
+      dR_md <- I_md_f_R_md()
+
+      dH <- -H_f_R_h() - H_f_D_h() - H_f_C() + I_su_f_H() + I_sd_f_H()
+      dR_h <- H_f_R_h()
+      dC <- -C_f_P() - C_f_D_c() + H_f_C()
+      dP <- -P_f_R_c() + C_f_P()
+      dR_c <- P_f_R_c()
+      dD_s <- I_su_f_D_s() + I_sd_f_D_s()
+      dD_h <- H_f_D_h()
+      dD_c <- C_f_D_c()
+      dConfirmedCases <- E_u_f_E_d() + I_1u_f_I_1d() + I_2u_f_I_2d() + I_mu_f_I_md() + I_su_f_I_sd() + I_su_f_H() * hdf + I_su_f_D_s() * ddf
+      dContributionAll <- S_f_E_u()
+      dContributionNonSymptomatics <- ContribNonSympt() # new infections caused by non-symptomatics
+      eta_d_flow <- I_sd_f_H()
+      eta_u_flow <- I_su_f_H()
+      r_h_flow <- H_f_R_h()
+      delta_h_flow <- H_f_D_h()
+      theta_flow <- H_f_C()
+
+
+      return(list(c(dS,
+                    dE_u,
+                    dI_1u,
+                    dI_2u,
+                    dI_mu,
+                    dI_su,
+                    dR_2u,
+                    dR_mu,
+                    dE_d,
+                    dI_1d,
+                    dI_2d,
+                    dI_md,
+                    dI_sd,
+                    dR_2d,
+                    dR_md,
+                    dH,
+                    dR_h,
+                    dC,
+                    dP,
+                    dR_c,
+                    dD_s,
+                    dD_h,
+                    dD_c,
+                    dConfirmedCases,
+                    dContributionAll,
+                    dContributionNonSymptomatics,
+                    eta_d_flow,
+                    eta_u_flow,
+                    r_h_flow,
+                    delta_h_flow,
+                    theta_flow)))
+
+    })
+  }
+
+
+
+  tspan <- seq(0, num_days, 1)
+
+  model_output <- as.data.frame(
+    deSolve::lsoda(
+      y,
+      tspan,
+      model,
+      c(100, 1000, 10000) #These are not actually used, just passing it because lsoda wants a vector
+    )
+  )
+
+  return(model_output)
+}
