@@ -18,45 +18,47 @@ myrmse <- function(model.features, target.features, weights){
 #' Calculates model RMSE
 #'
 #' @param modelOutput results from the model
-#' @param data The observed data being fit to
-#' @param local_epi_start_date_0 The date on which the model results start
-#' @param local_obs_start_date_0 The data on which the observed data start
-#' @param data Data frame The observed data
-#' @param report_lag_0 integer The lag between model data and observed data
-#' @param weights Vector Leght 2 vector containing weights indicating the relative weighting to give cases and deaths
-#' @param under_report_factor fraction Estimated fraction of deaths that get reported as covid-19 deaths
+#' @param start_date date The date which the first model time-point is being compared to.
+#' @param target_data Data frame The observed data that the model is targeted to match.
+#' @param weights Vector Vector of length 2 containing weights indicating the relative weighting to give cases and deaths.
+#'   For example  c(1.0, 0.5)
+#' @param under_report_factor fraction Estimated fraction of deaths that get reported as covid-19 deaths. This is deprecated and no longer used.
+#'   The estimated_deaths in the variable "cum_est_deaths" allows for adjusting the death reporting rates.
 #'
 #' @export
 #'
-modelrmse <- function(modelOutput = modelOutput,
-                      local_epi_start_date_0 = local_epi_start_date,
-                      local_obs_start_date_0 = local_obs_start_date,
-                      data = region_data,
-                      report_lag_0 = report_lag,
-                      weights = region_weights,
-                      under_report_factor = 1){
+modelrmse <- function(modelOutput,
+                      start_date,
+                      target_data,
+                      weights = c(1.0, 0.5),
+                      under_report_factor = 1)
+{
 
-  #model_end_date <- local_epi_start_date_0 + max(modelOutput$time) + report_lag_0
+  # The last day of observed data to be used
+  end_date <- start_date + max(modelOutput$time)
 
-  country_data <- data #%>%
-  #filter(date >= local_obs_start_date_0 & date <= model_end_date)
+  last_observed_data <- max(target_data$date)
 
-  target_features <- c(country_data$cum_cases / tail(country_data$cum_cases, 1),
-                       country_data$cum_est_deaths / tail(country_data$cum_est_deaths, 1))
+  # Filter the observed data so only looking at the part that overlaps with with model prediction
+  target_data <- target_data %>%
+  dplyr::filter(date >= start_date & date <= end_date)
+
+  target_features <- c(target_data$cum_cases / tail(target_data$cum_cases, 1),
+                       target_data$cum_est_deaths / tail(target_data$cum_est_deaths, 1))
 
   target_features[is.na(target_features)] <- 0
 
   model.df_current <- modelOutput %>%
     dplyr::mutate(AllDeaths = D_s + D_h + D_c,
-           local_epi_start_date = local_epi_start_date_0,
-           date = local_epi_start_date_0 + time + report_lag_0)
+#           local_epi_start_date = local_epi_start_date_0,
+           date = start_date + time)
 
   model.df_current <- model.df_current %>%
-    dplyr::filter(date >= local_obs_start_date_0 & date <= max(country_data$date))
+    dplyr::filter(date >= start_date & date <= max(target_data$date))
 
   model.df_current <- model.df_current %>%
-    dplyr::mutate(ConfirmedCasesRescaled = ConfirmedCases / tail(country_data$cum_cases, 1),
-           AllDeathsRescaled = AllDeaths / tail(country_data$cum_est_deaths, 1))
+    dplyr::mutate(ConfirmedCasesRescaled = ConfirmedCases / tail(target_data$cum_cases, 1),
+           AllDeathsRescaled = AllDeaths / tail(target_data$cum_est_deaths, 1))
 
 
   if(under_report_factor != 1) {

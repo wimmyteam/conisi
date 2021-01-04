@@ -6,13 +6,11 @@ test_that("rmse works", {
   mod_result <- dplyr::mutate(mod_result, experiment = 1)
 
   load(system.file("test-data", "observed_data.RData", package="conisi"))
-  start_date <- test_data$date[2]
+  start_date <- test_data$date[1]
 
   rmse <- modelrmse(modelOutput = mod_result,
-                    local_epi_start_date_0 = start_date,
-                    local_obs_start_date_0 = start_date,
-                    data = test_data,
-                    report_lag_0 = 2,
+                    start_date,
+                    test_data,
                     weights = c(1, 0.5)
   )
 
