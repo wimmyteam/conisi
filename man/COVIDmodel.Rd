@@ -4,16 +4,14 @@
 \alias{COVIDmodel}
 \title{Runs the conisi COVID-19 model}
 \usage{
-COVIDmodel(parm_table, pop_size, local_epi_start_date, end_date = today)
+COVIDmodel(parm_table, pop_size, num_days)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format).}
 
-\item{pop_size}{Integer The size of the population being modelled}
+\item{pop_size}{Integer The size of the population being modelled.}
 
-\item{local_epi_start_date}{The data on which to start the simulation}
-
-\item{end_date}{The date on which to end the simulation (defaults to today)}
+\item{num_days}{Integer How many days to run the simulation for.}
 }
 \value{
 A data frame with the values of the various compartments over time
