@@ -5,29 +5,25 @@
 \title{Calculates model RMSE}
 \usage{
 modelrmse(
-  modelOutput = modelOutput,
-  local_epi_start_date_0 = local_epi_start_date,
-  local_obs_start_date_0 = local_obs_start_date,
-  data = region_data,
-  report_lag_0 = report_lag,
-  weights = region_weights,
+  modelOutput,
+  start_date,
+  target_data,
+  weights = c(1, 0.5),
   under_report_factor = 1
 )
 }
 \arguments{
 \item{modelOutput}{results from the model}
 
-\item{local_epi_start_date_0}{The date on which the model results start}
+\item{start_date}{date The date which the first model time-point is being compared to.}
 
-\item{local_obs_start_date_0}{The data on which the observed data start}
+\item{target_data}{Data frame The observed data that the model is targeted to match.}
 
-\item{data}{Data frame The observed data}
+\item{weights}{Vector Vector of length 2 containing weights indicating the relative weighting to give cases and deaths.
+For example  c(1.0, 0.5)}
 
-\item{report_lag_0}{integer The lag between model data and observed data}
-
-\item{weights}{Vector Leght 2 vector containing weights indicating the relative weighting to give cases and deaths}
-
-\item{under_report_factor}{fraction Estimated fraction of deaths that get reported as covid-19 deaths}
+\item{under_report_factor}{fraction Estimated fraction of deaths that get reported as covid-19 deaths. This is deprecated and no longer used.
+The estimated_deaths in the variable "cum_est_deaths" allows for adjusting the death reporting rates.}
 }
 \description{
 Calculates model RMSE
