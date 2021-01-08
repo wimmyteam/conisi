@@ -66,9 +66,6 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
     with(as.list(c(y, parms)),{
 
-
-      b_a <- 0 # seasonality amplitude                  # Fix to zero, i.e. no longer a parameter
-      b_c <- 0 # seasonality shift                      # Fix to zero, i.e. no longer a parameter
       c_e1d <- c_e1u                                    # Set equal to c_e1u, i.e. no longer a parameter
       c_12d <- c_12u                                    # Set equal to c_12u, i.e. no longer a parameter
       c_1md <- c_1mu                                    # Set equal to c_1mu, i.e. no longer a parameter
@@ -83,23 +80,23 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
 
       S_f_E_u <- function(){
-        beta <- a_1u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1u * S / pop_size +
-          a_2u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2u * S / pop_size +
-          1 * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_mu * S / pop_size +
-          a_su * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_su * S / pop_size +
-          a_1d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1d * S / pop_size +
-          a_2d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2d * S / pop_size +
-          a_md * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_md * S / pop_size +
-          a_sd * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_sd * S / pop_size
+        beta <- a_1u * (b_a / 2 + b_b) * I_1u * S / pop_size +
+          a_2u * (b_a / 2 + b_b) * I_2u * S / pop_size +
+          1 * (b_a / 2 + b_b) * I_mu * S / pop_size +
+          a_su * (b_a / 2 + b_b) * I_su * S / pop_size +
+          a_1d * (b_a / 2 + b_b) * I_1d * S / pop_size +
+          a_2d * (b_a / 2 + b_b) * I_2d * S / pop_size +
+          a_md * (b_a / 2 + b_b) * I_md * S / pop_size +
+          a_sd * (b_a / 2 + b_b) * I_sd * S / pop_size
 
         return (beta * FOIadjust)
       }
 
       ContribNonSympt <- function(){
-        betaNS <- a_1u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1u * S / pop_size +
-          a_2u * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2u * S / pop_size +
-          a_1d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_1d * S / pop_size +
-          a_2d * (b_a / 2 * cos(2 * pi * (t - b_c) / 365) + (b_a / 2 + b_b)) * I_2d * S / pop_size
+        betaNS <- a_1u * ( + (b_a / 2 + b_b)) * I_1u * S / pop_size +
+          a_2u * (b_a / 2 + b_b) * I_2u * S / pop_size +
+          a_1d * (b_a / 2 + b_b) * I_1d * S / pop_size +
+          a_2d * (b_a / 2 + b_b) * I_2d * S / pop_size
 
         return(betaNS * FOIadjust)
 
