@@ -66,40 +66,28 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
     with(as.list(c(y, parms)),{
 
-      c_e1d <- c_e1u                                    # Set equal to c_e1u, i.e. no longer a parameter
-      c_12d <- c_12u                                    # Set equal to c_12u, i.e. no longer a parameter
-      c_1md <- c_1mu                                    # Set equal to c_1mu, i.e. no longer a parameter
-      c_1sd <- c_1su                                    # Set equal to c_1su, i.e. no longer a parameter
-      eta_d <- eta_u                                    # Set equal to eta_u, i.e. no longer a parameter
-      delta_sd <- delta_su                              # Set equal to delta_su, i.e. no longer a parameter
-      r_2d <- r_2u                                      # Set equal to r_2u, i.e. no longer a parameter
-      r_md <- r_mu                                      # Set equal to r_mu, i.e. no longer a parameter
-      d_e <- 0                                          # Fix to zero, i.e. no longer a parameter
-
       hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
 
       S_f_E_u <- (
-        a_1u * b_b * I_1u * S / pop_size +
-        a_2u * b_b * I_2u * S / pop_size +
-        1 * b_b * I_mu * S / pop_size +
-        a_su * b_b * I_su * S / pop_size +
-        a_1d * b_b * I_1d * S / pop_size +
-        a_2d * b_b * I_2d * S / pop_size +
-        a_md * b_b * I_md * S / pop_size +
-        a_sd * b_b * I_sd * S / pop_size
-      ) * FOIadjust
+        a_1u * b_b * I_1u +
+        a_2u * b_b * I_2u +
+        1 * b_b * I_mu +
+        a_su * b_b * I_su +
+        a_1d * b_b * I_1d +
+        a_2d * b_b * I_2d +
+        a_md * b_b * I_md +
+        a_sd * b_b * I_sd
+      ) * FOIadjust * S / pop_size
 
       ContribNonSympt <- (
-        a_1u * ( + b_b) * I_1u * S / pop_size +
-        a_2u * b_b * I_2u * S / pop_size +
-        a_1d * b_b * I_1d * S / pop_size +
-        a_2d * b_b * I_2d * S / pop_size
-      ) * FOIadjust
+        a_1u * ( + b_b) * I_1u +
+        a_2u * b_b * I_2u +
+        a_1d * b_b * I_1d +
+        a_2d * b_b * I_2d
+      ) * FOIadjust * S / pop_size
 
       E_u_f_I_1u <- c_e1u * E_u
-
-      E_u_f_E_d <- d_e * E_u
 
       I_1u_f_I_2u <- c_12u * I_1u
 
@@ -127,21 +115,21 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       I_su_f_I_sd <- d_s * I_su
 
 
-      E_d_f_I_1d <- c_e1d * E_d
+      E_d_f_I_1d <- c_e1u * E_d
 
-      I_1d_f_I_2d <- c_12d * I_1d
+      I_1d_f_I_2d <- c_12u * I_1d
 
-      I_1d_f_I_md <- c_1md * I_1d
+      I_1d_f_I_md <- c_1mu * I_1d
 
-      I_1d_f_I_sd <- c_1sd * I_1d
+      I_1d_f_I_sd <- c_1su * I_1d
 
-      I_2d_f_R_2d <- r_2d * I_2d
+      I_2d_f_R_2d <- r_2u * I_2d
 
-      I_md_f_R_md <- r_md * I_md
+      I_md_f_R_md <- r_mu * I_md
 
-      eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
+      eta_d_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
 
-      I_sd_f_D_s <- (delta_sd + (eta_d - eta_d_eff)) * I_sd
+      I_sd_f_D_s <- (delta_su + (eta_u - eta_d_eff)) * I_sd
 
       I_sd_f_H <- eta_d_eff * I_sd
 
@@ -162,7 +150,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
       # Defining the system of differential equations
       dS <- -S_f_E_u
-      dE_u <- -E_u_f_I_1u - E_u_f_E_d + S_f_E_u
+      dE_u <- -E_u_f_I_1u + S_f_E_u
       dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
       dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
       dI_mu <- -I_mu_f_R_mu - I_mu_f_I_md + I_1u_f_I_mu
@@ -170,7 +158,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       dR_2u <- I_2u_f_R_2u
       dR_mu <- I_mu_f_R_mu
 
-      dE_d <- -E_d_f_I_1d + E_u_f_E_d
+      dE_d <- -E_d_f_I_1d
       dI_1d <- -I_1d_f_I_2d - I_1d_f_I_md - I_1d_f_I_sd + I_1u_f_I_1d + E_d_f_I_1d
       dI_2d <- -I_2d_f_R_2d + I_2u_f_I_2d + I_1d_f_I_2d
       dI_md <- -I_md_f_R_md + I_mu_f_I_md + I_1d_f_I_md
@@ -186,7 +174,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       dD_s <- I_su_f_D_s + I_sd_f_D_s
       dD_h <- H_f_D_h
       dD_c <- C_f_D_c
-      dConfirmedCases <- E_u_f_E_d + I_1u_f_I_1d + I_2u_f_I_2d + I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
+      dConfirmedCases <- I_1u_f_I_1d + I_2u_f_I_2d + I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
       dContributionAll <- S_f_E_u
       dContributionNonSymptomatics <- ContribNonSympt # new infections caused by non-symptomatics
       eta_d_flow <- I_sd_f_H
