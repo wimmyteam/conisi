@@ -79,242 +79,121 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
 
-      S_f_E_u <- function(){
-        beta <- a_1u * (b_a / 2 + b_b) * I_1u * S / pop_size +
-          a_2u * (b_a / 2 + b_b) * I_2u * S / pop_size +
-          1 * (b_a / 2 + b_b) * I_mu * S / pop_size +
-          a_su * (b_a / 2 + b_b) * I_su * S / pop_size +
-          a_1d * (b_a / 2 + b_b) * I_1d * S / pop_size +
-          a_2d * (b_a / 2 + b_b) * I_2d * S / pop_size +
-          a_md * (b_a / 2 + b_b) * I_md * S / pop_size +
-          a_sd * (b_a / 2 + b_b) * I_sd * S / pop_size
+      S_f_E_u <- (
+        a_1u * b_b * I_1u * S / pop_size +
+        a_2u * b_b * I_2u * S / pop_size +
+        1 * b_b * I_mu * S / pop_size +
+        a_su * b_b * I_su * S / pop_size +
+        a_1d * b_b * I_1d * S / pop_size +
+        a_2d * b_b * I_2d * S / pop_size +
+        a_md * b_b * I_md * S / pop_size +
+        a_sd * b_b * I_sd * S / pop_size
+      ) * FOIadjust
 
-        return (beta * FOIadjust)
-      }
+      ContribNonSympt <- (
+        a_1u * ( + b_b) * I_1u * S / pop_size +
+        a_2u * b_b * I_2u * S / pop_size +
+        a_1d * b_b * I_1d * S / pop_size +
+        a_2d * b_b * I_2d * S / pop_size
+      ) * FOIadjust
 
-      ContribNonSympt <- function(){
-        betaNS <- a_1u * ( + (b_a / 2 + b_b)) * I_1u * S / pop_size +
-          a_2u * (b_a / 2 + b_b) * I_2u * S / pop_size +
-          a_1d * (b_a / 2 + b_b) * I_1d * S / pop_size +
-          a_2d * (b_a / 2 + b_b) * I_2d * S / pop_size
+      E_u_f_I_1u <- c_e1u * E_u
 
-        return(betaNS * FOIadjust)
+      E_u_f_E_d <- d_e * E_u
 
-      }
+      I_1u_f_I_2u <- c_12u * I_1u
 
-      E_u_f_I_1u <- function(){
+      I_1u_f_I_mu <- c_1mu * I_1u
 
+      I_1u_f_I_su <- c_1su * I_1u
 
-        c_e1u * E_u
+      I_1u_f_I_1d <- d_1 * I_1u
 
-      }
+      I_2u_f_R_2u <- r_2u * I_2u
 
-      E_u_f_E_d <- function(){
+      I_2u_f_I_2d <- d_2 * I_2u
 
-        d_e * E_u
+      I_mu_f_R_mu <- r_mu * I_mu
 
-      }
+      I_mu_f_I_md <- d_m * I_mu
 
-      I_1u_f_I_2u <- function(){
+      eta_u_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil) # The effective rate, taking into account the ceiling v
 
-        c_12u * I_1u
+      I_su_f_D_s <- (delta_su + eta_u - eta_u_eff) * I_su
 
-      }
+      I_su_f_H <- eta_u_eff * I_su
 
-      I_1u_f_I_mu <- function(){
 
-        c_1mu * I_1u
+      I_su_f_I_sd <- d_s * I_su
 
-      }
 
-      I_1u_f_I_su <- function(){
+      E_d_f_I_1d <- c_e1d * E_d
 
-        c_1su * I_1u
+      I_1d_f_I_2d <- c_12d * I_1d
 
-      }
+      I_1d_f_I_md <- c_1md * I_1d
 
-      I_1u_f_I_1d <- function(){
+      I_1d_f_I_sd <- c_1sd * I_1d
 
-        d_1 * I_1u
+      I_2d_f_R_2d <- r_2d * I_2d
 
-      }
+      I_md_f_R_md <- r_md * I_md
 
-      I_2u_f_R_2u <- function(){
+      eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
 
-        r_2u * I_2u
+      I_sd_f_D_s <- (delta_sd + (eta_d - eta_d_eff)) * I_sd
 
-      }
+      I_sd_f_H <- eta_d_eff * I_sd
 
-      I_2u_f_I_2d <- function(){
+      H_f_R_h <- r_h * H
 
-        d_2 * I_2u
+      theta_eff <- theta * (C < c_ceil) + (theta * exp(500 * (1 - C / c_ceil))) * (C >= c_ceil)
 
-      }
+      H_f_D_h <- (delta_h * delta_h_adjust + (theta - theta_eff)) * H
 
-      I_mu_f_R_mu <- function(){
+      H_f_C <- theta_eff * H
 
-        r_mu * I_mu
+      C_f_P <- rho * C
 
-      }
+      C_f_D_c <- delta_c * delta_h_adjust * C
 
-      I_mu_f_I_md <- function(){
-
-        d_m * I_mu
-
-      }
-
-      I_su_f_D_s <- function(){
-
-        eta_u_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
-        (delta_su + (eta_u - eta_u_eff)) * I_su
-
-      }
-
-      I_su_f_H <- function(){
-
-        eta_u_eff <- eta_u * (H < h_ceil) + (eta_u * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil) # The effective rate, taking into account the ceiling v
-        eta_u_eff * I_su
-
-      }
-
-      I_su_f_I_sd <- function(){
-
-        d_s * I_su
-
-      }
-
-      E_d_f_I_1d <- function(){
-
-        c_e1d * E_d
-
-      }
-
-      I_1d_f_I_2d <- function(){
-
-        c_12d * I_1d
-
-      }
-
-      I_1d_f_I_md <- function(){
-
-        c_1md * I_1d
-
-      }
-
-      I_1d_f_I_sd <- function(){
-
-        c_1sd * I_1d
-
-      }
-
-      I_2d_f_R_2d <- function(){
-
-        r_2d * I_2d
-
-      }
-
-      I_md_f_R_md <- function(){
-
-        r_md * I_md
-
-      }
-
-      I_sd_f_D_s <- function(){
-
-        eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil)
-
-        (delta_sd + (eta_d - eta_d_eff)) * I_sd
-
-      }
-
-      I_sd_f_H <- function(){
-
-        eta_d_eff <- eta_d * (H < h_ceil) + (eta_d * exp(500 * (1 - H / h_ceil))) * (H >= h_ceil) # The effective rate, taking into account the ceiling v
-
-        eta_d_eff * I_sd
-
-      }
-
-      H_f_R_h <- function(){
-
-        r_h * H
-
-      }
-
-      H_f_D_h <- function(){
-
-        delta_h <- delta_h * delta_h_adjust
-
-        theta_eff <- theta * (C < c_ceil) + (theta * exp(500 * (1 - C / c_ceil))) * (C >= c_ceil)
-
-        (delta_h + (theta - theta_eff)) * H
-
-      }
-
-      H_f_C <- function(){
-
-        theta_eff <- theta * (C < c_ceil) + (theta * exp(500 * (1 - C / c_ceil))) * (C >= c_ceil) # The effective rate, taking into account the ceiling w
-
-        theta_eff * H
-
-      }
-
-      C_f_P <- function(){
-
-        rho * C
-
-      }
-
-      C_f_D_c <- function(){
-
-        delta_c <- delta_c * delta_h_adjust
-
-        delta_c * C
-
-      }
-
-      P_f_R_c <- function(){
-
-        r_p * P
-
-      }
+      P_f_R_c <- r_p * P
 
 
       # Defining the system of differential equations
-      dS <- -S_f_E_u()
-      dE_u <- -E_u_f_I_1u() - E_u_f_E_d() + S_f_E_u()
-      dI_1u <- -I_1u_f_I_2u() - I_1u_f_I_mu() - I_1u_f_I_su() - I_1u_f_I_1d() + E_u_f_I_1u()
-      dI_2u <- -I_2u_f_R_2u() - I_2u_f_I_2d() + I_1u_f_I_2u()
-      dI_mu <- -I_mu_f_R_mu() - I_mu_f_I_md() + I_1u_f_I_mu()
-      dI_su <- -I_su_f_D_s() - I_su_f_H() - I_su_f_I_sd() + I_1u_f_I_su()
-      dR_2u <- I_2u_f_R_2u()
-      dR_mu <- I_mu_f_R_mu()
+      dS <- -S_f_E_u
+      dE_u <- -E_u_f_I_1u - E_u_f_E_d + S_f_E_u
+      dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
+      dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
+      dI_mu <- -I_mu_f_R_mu - I_mu_f_I_md + I_1u_f_I_mu
+      dI_su <- -I_su_f_D_s - I_su_f_H - I_su_f_I_sd + I_1u_f_I_su
+      dR_2u <- I_2u_f_R_2u
+      dR_mu <- I_mu_f_R_mu
 
-      dE_d <- -E_d_f_I_1d() + E_u_f_E_d()
-      dI_1d <- -I_1d_f_I_2d() - I_1d_f_I_md() - I_1d_f_I_sd() + I_1u_f_I_1d() + E_d_f_I_1d()
-      dI_2d <- -I_2d_f_R_2d() + I_2u_f_I_2d() + I_1d_f_I_2d()
-      dI_md <- -I_md_f_R_md() + I_mu_f_I_md() + I_1d_f_I_md()
-      dI_sd <- -I_sd_f_D_s() - I_sd_f_H() + I_su_f_I_sd() + I_1d_f_I_sd()
-      dR_2d <- I_2d_f_R_2d()
-      dR_md <- I_md_f_R_md()
+      dE_d <- -E_d_f_I_1d + E_u_f_E_d
+      dI_1d <- -I_1d_f_I_2d - I_1d_f_I_md - I_1d_f_I_sd + I_1u_f_I_1d + E_d_f_I_1d
+      dI_2d <- -I_2d_f_R_2d + I_2u_f_I_2d + I_1d_f_I_2d
+      dI_md <- -I_md_f_R_md + I_mu_f_I_md + I_1d_f_I_md
+      dI_sd <- -I_sd_f_D_s - I_sd_f_H + I_su_f_I_sd + I_1d_f_I_sd
+      dR_2d <- I_2d_f_R_2d
+      dR_md <- I_md_f_R_md
 
-      dH <- -H_f_R_h() - H_f_D_h() - H_f_C() + I_su_f_H() + I_sd_f_H()
-      dR_h <- H_f_R_h()
-      dC <- -C_f_P() - C_f_D_c() + H_f_C()
-      dP <- -P_f_R_c() + C_f_P()
-      dR_c <- P_f_R_c()
-      dD_s <- I_su_f_D_s() + I_sd_f_D_s()
-      dD_h <- H_f_D_h()
-      dD_c <- C_f_D_c()
-      dConfirmedCases <- E_u_f_E_d() + I_1u_f_I_1d() + I_2u_f_I_2d() + I_mu_f_I_md() + I_su_f_I_sd() + I_su_f_H() * hdf + I_su_f_D_s() * ddf
-      dContributionAll <- S_f_E_u()
-      dContributionNonSymptomatics <- ContribNonSympt() # new infections caused by non-symptomatics
-      eta_d_flow <- I_sd_f_H()
-      eta_u_flow <- I_su_f_H()
-      r_h_flow <- H_f_R_h()
-      delta_h_flow <- H_f_D_h()
-      theta_flow <- H_f_C()
-
+      dH <- -H_f_R_h - H_f_D_h - H_f_C + I_su_f_H + I_sd_f_H
+      dR_h <- H_f_R_h
+      dC <- -C_f_P - C_f_D_c + H_f_C
+      dP <- -P_f_R_c + C_f_P
+      dR_c <- P_f_R_c
+      dD_s <- I_su_f_D_s + I_sd_f_D_s
+      dD_h <- H_f_D_h
+      dD_c <- C_f_D_c
+      dConfirmedCases <- E_u_f_E_d + I_1u_f_I_1d + I_2u_f_I_2d + I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
+      dContributionAll <- S_f_E_u
+      dContributionNonSymptomatics <- ContribNonSympt # new infections caused by non-symptomatics
+      eta_d_flow <- I_sd_f_H
+      eta_u_flow <- I_su_f_H
+      r_h_flow <- H_f_R_h
+      delta_h_flow <- H_f_D_h
+      theta_flow <- H_f_C
 
       return(list(c(dS,
                     dE_u,

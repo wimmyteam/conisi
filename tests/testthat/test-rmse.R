@@ -14,5 +14,5 @@ test_that("rmse works", {
                     weights = c(1, 0.5)
   )
 
-  expect_gt(rmse, 0)
+  expect_lt(abs(rmse - 0.3085345), 0.0001)
 })
