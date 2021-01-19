@@ -1,11 +1,5 @@
 # Dependencies: deSolve, dplyr, tibble
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Description: This scripts contains functions used for running the
-# COVID-19 models
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-#'
 #'  Runs the conisi COVID-19 model
 #'
 #' Solves the system of differential equations that make up the conisi model
@@ -55,7 +49,12 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
          eta_u_cumul_flow = 0,
          r_h_cumul_flow = 0,
          delta_h_cumul_flow = 0,
-         theta_cumul_flow = 0)
+         theta_cumul_flow = 0,
+         Asymp_diagnozed_cumul_flow = 0, # Cumul flow of diagnoses that were asymptomatic (including presymptomatic) at time of diagnosis
+         Symp_diagnozed_cumul_flow = 0, # Cumul flow of diagnoses that were symptomatic at time of diagnosis
+         Asymp_inf_cumul_flow = 0, # Cumul flow of infections that stay symptomatic
+         Symp_inf_cumul_flow = 0 # Cumul flow of infections that become symptomatic
+  )
 
   model <- function(t, y, parms){
 
@@ -182,6 +181,10 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       r_h_flow <- H_f_R_h
       delta_h_flow <- H_f_D_h
       theta_flow <- H_f_C
+      Asymp_diagnozed_flow <- I_1u_f_I_1d + I_2u_f_I_2d
+      Symp_diagnozed_flow <- I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
+      Asymp_inf_flow <- I_1u_f_I_2u + I_1d_f_I_2d
+      Symp_inf_flow <- I_1u_f_I_mu + I_1u_f_I_su + I_1d_f_I_md + I_1d_f_I_sd
 
       return(list(c(dS,
                     dE_u,
@@ -213,7 +216,11 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
                     eta_u_flow,
                     r_h_flow,
                     delta_h_flow,
-                    theta_flow)))
+                    theta_flow,
+                    Asymp_diagnozed_flow,
+                    Symp_diagnozed_flow,
+                    Asymp_inf_flow,
+                    Symp_inf_flow)))
 
     })
   }
