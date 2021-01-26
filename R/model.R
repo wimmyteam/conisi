@@ -157,7 +157,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
 
       # Defining the system of differential equations
-      dS <- -S_f_E_u + R_2d_f_S + R_md_f_S + R_h_f_S + R_c_f_S
+      dS <- -S_f_E_u + R_2u_f_S + R_2d_f_S + R_mu_f_S + R_md_f_S + R_h_f_S + R_c_f_S
       dE_u <- -E_u_f_I_1u + S_f_E_u
       dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
       dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
