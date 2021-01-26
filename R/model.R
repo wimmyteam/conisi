@@ -147,8 +147,15 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       P_f_R_c <- r_p * P
 
 
+      # Adding the assumptions of waning immunity: flows from R_* to S, at rate upsilon (simplest possible flow assumptions: constant rate)
+      R_2d_f_S <- upsilon * R_2d
+      R_md_f_S <- upsilon * R_md
+      R_h_f_S <- upsilon * R_h
+      R_c_f_S <- upsilon * R_c
+
+
       # Defining the system of differential equations
-      dS <- -S_f_E_u
+      dS <- -S_f_E_u + R_2d_f_S + R_md_f_S + R_h_f_S + R_c_f_S
       dE_u <- -E_u_f_I_1u + S_f_E_u
       dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
       dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
