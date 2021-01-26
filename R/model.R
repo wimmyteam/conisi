@@ -243,7 +243,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       y,
       tspan,
       model,
-      c(100, 1000, 10000) #These are not actually used, just passing it because lsoda wants a vector
+      c(1, 1, 1) # c(100, 1000, 10000) #These are not actually used, just passing it because lsoda wants a vector
     )
   )
 
