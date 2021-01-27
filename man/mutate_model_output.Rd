@@ -6,7 +6,7 @@
 and creates new variables that are needed for metrics of interest. The
 output from this function is another dataframe / tibble.}
 \usage{
-mutate_model_output(df, pop, under_report_factor = 1)
+mutate_model_output(df, pop)
 }
 \arguments{
 \item{df}{Dataframe Output from COVIDmodel. The input data frame must have a row that represents
@@ -14,6 +14,8 @@ each experiment and
 time point within the experiment. The columns must contain the parameter combinations that
 were used for each experiment and time point, as well as basic model output showing
 the numbers in each compartment at a given time.}
+
+\item{pop}{Integer The size of the modeled population}
 }
 \description{
 This function processes the model output

@@ -1,5 +1,3 @@
-# Dependencies: deSolve, dplyr, tibble
-
 #'  Runs the conisi COVID-19 model
 #'
 #' Solves the system of differential equations that make up the conisi model
@@ -248,4 +246,93 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
   )
 
   return(model_output)
+}
+
+model_result_extend <- function(mod_result, par_table) {
+  par_df_wide <- par_table %>%
+    tidyr::pivot_wider(id_cols = c(experiment, start_time),
+                       names_from = parameter_name,
+                       values_from = value)
+
+
+  mod_result <- mod_result %>%
+    dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
+    tidyr::fill(everything(), .direction = "down")
+
+  return(mod_result)
+}
+
+#' Runs the conisi COVID-19 model and applies mutate_model to the result
+#'
+#' @param parm_table A data frame containing the time-varying parameters (in long format).
+#' @param pop_size Integer The size of the population being modelled.
+#' @param num_days Integer How many days to run the simulation for.
+#'
+#' @return A data frame with the values of the various compartments, parameters and other statistics over time
+#'
+#' @export
+#'
+COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
+{
+  mod_result <- COVIDmodel(parm_table, pop_size, num_days)
+
+  if(! "experiment" %in% parm_table){
+    parm_table <- dplyr::mutate(parm_table, experiment = 1)
+  }
+
+  par_df_wide <- parm_table %>%
+    tidyr::pivot_wider(id_cols = c(experiment, start_time),
+                       names_from = parameter_name,
+                       values_from = value)
+
+  mod_result <- mod_result %>%
+    dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
+    tidyr::fill(everything(), .direction = "down")
+
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size)
+
+  return(mod_result)
+}
+
+#' Runs the conisi COVID-19 model on multiple parameter sets at once
+#'
+#' @param parm_table A data frame containing the time-varying parameters (in long format) for multiple experiments.
+#' @param pop_size Integer The size of the population being modelled.
+#' @param num_days Integer How many days to run the simulation for.
+#'
+#' @return A data frame with the values of the various compartments, parameters and other statistics over time
+#' @importFrom foreach %dopar%
+#' @export
+COVIDmodel_run_many <- function(parm_table, pop_size, num_days){
+
+  experiments <- unique(parm_table$experiment)
+
+  mod_results <- foreach::foreach (j = experiments, .combine = dplyr::bind_rows)  %dopar% {
+
+    single_experiment_params <- parm_table %>%
+      dplyr::filter(experiment == j)
+
+    exp_result <- COVIDmodel(parm_table = single_experiment_params,
+                              pop_size,
+                              num_days)
+
+    model_result_extend(exp_result, parm_table)
+
+  }
+  return(mod_results)
+}
+
+#' Runs the conisi COVID-19 model on multiple parameter sets at once and applies mutate_model to the result
+#'
+#' @param parm_table A data frame containing the time-varying parameters (in long format) for multiple experiments.
+#' @param pop_size Integer The size of the population being modelled.
+#' @param num_days Integer How many days to run the simulation for.
+#'
+#' @return A data frame with the values of the various compartments
+#'
+#' @export
+#'
+COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days){
+  mod_result <- COVIDmodel_run_many(parm_table, pop_size, num_days)
+  conisi::mutate_model_output(mod_result, pop_size)
 }

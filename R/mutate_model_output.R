@@ -8,12 +8,13 @@
 #'   time point within the experiment. The columns must contain the parameter combinations that
 #'   were used for each experiment and time point, as well as basic model output showing
 #'   the numbers in each compartment at a given time.
+#' @param pop Integer The size of the modeled population
 #'
 #' @export
 #'
 #' @importFrom magrittr %>%
 
-mutate_model_output <- function(df, pop, under_report_factor = 1) {
+mutate_model_output <- function(df, pop) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
@@ -89,13 +90,6 @@ mutate_model_output <- function(df, pop, under_report_factor = 1) {
            cfr = fraction(AllDeaths, ConfirmedCases))#, # Cum deaths at a point in time / all cumulative detected cases
            #local_epi_start_date = local_epi_start_date,
            #date = local_epi_start_date + time + report_lag)
-
-  if(under_report_factor != 1) {
-
-    df1 <- df1 %>%
-      dplyr::mutate(AllDeaths = AllDeaths * under_report_factor)
-
-  }
 
   # Create vars that apply to each experiment
   df2 <- df1 %>%
