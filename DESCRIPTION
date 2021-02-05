@@ -25,4 +25,7 @@ Imports:
     foreach,
     doParallel
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
