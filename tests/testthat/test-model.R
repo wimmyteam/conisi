@@ -13,7 +13,7 @@ test_that("Model helper functions work", {
   mod_result <- COVIDmodel_run_and_mutate(par_table, pop, 100)
   #mod_result <- dplyr::mutate(mod_result, experiment = 1)
 
-  expect_length(mod_result, 240)
+  expect_length(mod_result, 246)
 
   availablecores <- 2
   doParallel::registerDoParallel(cores = availablecores)
@@ -27,5 +27,5 @@ test_that("Model helper functions work", {
   expect_length(mod_result_2, 69)
 
   mod_result_3 <- COVIDmodel_run_and_mutate_many(xparm_table, pop, 100)
-  expect_length(mod_result, 240)
+  expect_length(mod_result, 246)
 })
