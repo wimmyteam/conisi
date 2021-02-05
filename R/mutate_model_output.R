@@ -10,17 +10,31 @@
 #'   the numbers in each compartment at a given time.
 #' @param pop Integer The size of the modeled population
 #'
+#' @param start_date Date This is the start date for the local epidemic and it is used for adding a
+#'   date column to the output.
+#'
+#' @param  report_lag Integer This is the number of days we assume pass between the infection and
+#'   when it is first reported.
+#'
 #' @export
 #'
 #' @importFrom magrittr %>%
 
-mutate_model_output <- function(df, pop) {
+mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
   fraction <- function(a, b)
   {
     ifelse(b > 1e-10, a/b, NA)
+  }
+
+  # Do we need to create a date variable
+  if(!is.null(start_date)){
+
+  df <- df %>%
+    mutate(date = start_date + time + report_lag)
+
   }
 
   # Create vars that apply to each row
@@ -91,8 +105,6 @@ mutate_model_output <- function(df, pop) {
            idf = fraction(KnownInfections + H + P + C, ActiveInfections + H + P + C),
            ifr = fraction(AllDeaths, ContribAll), # All deaths at a point in time / Cumulative Incidence (all people who have been infected)
            cfr = fraction(AllDeaths, ConfirmedCases))#, # Cum deaths at a point in time / all cumulative detected cases
-           #local_epi_start_date = local_epi_start_date,
-           #date = local_epi_start_date + time + report_lag)
 
   # Create vars that apply to each experiment
   df2 <- df1 %>%
