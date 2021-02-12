@@ -1,0 +1,1133 @@
+---
+title: "CONISI Codebook"
+author: "Prepared by: Roxanne Beauclair (roxanne.beauclair@wimmy.co.za)"
+date: 'Last updated on: `r lubridate::today()`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CONISI Codebook}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE,  
+  echo = FALSE
+)
+
+# Allow duplicate chunk labels
+options(knitr.duplicate.label = "allow")
+```
+
+```{r setup, include = FALSE}
+
+# ====================
+# Loading dependencies
+# ====================
+library(conisi)
+library(tidyverse)
+library(kableExtra)
+
+# ===================
+# Relative file paths
+# ===================
+#data_file <- system.file("extdata", "Example_Model_Output.RData", package = "conisi")
+
+data_file <- "Example_Model_Output.RData"
+
+# =============
+# Load datasets
+# =============
+load(data_file)
+df <- conisi::mutate_model_output(modelOutput,
+                          pop = 168559618,
+                          report_lag = 2,
+                          start = lubridate::ymd("2020-03-12"))
+
+# =============
+# Plot settings 
+# =============
+
+#theme <- theme(axis.text.x = element_text(angle = 10, size = 8))
+
+```
+
+
+# Metadata
+
+<br>
+
+**Dataset name**: CONISI Model Output <br>
+**Description of dataset**: The dataset you are using will be specific to a region - either South Africa, Peru, Brazil, Chile, Zimbabwe, Limpopo Province, North West Province, Northern Cape Province, or Eastern Cape Province. Moreover, each value will be unique to the point in time for which the model was run. All datasets for each region and model run will have the same number and names of columns. This dataset currently contains `r ncol(df)` variables. Each row in the dataset represents a unique model run and time point in the model run. For example, this dataset of output contains `r nrow(df)` total rows of output, that belong to `r round(nrow(df) / max(df$time))` model runs. Each of those model runs has a unique set of parameters that were used as input. Each model run has a row for `r max(df$time)` time steps.
+
+<br>
+
+# Description of Variables
+
+<br>
+
+There are five different types of variables: identifiers, parameters, compartments, compartment combinations, and flows.
+
+<br>
+
+## Indentifiers
+
+<br>
+
+These variables in combination uniquely identify each row in the dataset.
+
+<br>
+
+### experiment
+
+<br>
+
+This variable contains an integer that identifies the model run that the row belonged to.
+
+<br>
+<br>
+
+### time
+
+<br>
+
+This variable contains an integer that represents the number of days that have passed within the model world.
+
+<br>
+<br>
+
+### date
+
+<br>
+
+This is the conversion of the `time` variable into a date in the real world based upon when the local epidemic started and assumed reporting delays. The variable is formatted as YYYY-MM-DD. In this dataset the earliest date simulated is `r format(min(df$date), "%A, %d %B %Y")` and the most recent date availble is `r format(max(df$date), "%A, %d %B %Y")`.
+
+<br>
+
+## Parameters
+
+<br>
+
+The parameter variables were used as inputs into the model. They govern the rates at which people in the population move from one compartment (i.e. disease/health state) to another. Each model run (i.e. experiment) uses a unique set of parameters. The parameters will be the same across all time steps for that particular model run. Parameter variables are prefixed with "par_".
+
+<br>
+
+### par_a_1d
+
+<br>
+
+This is the infectivity of *diagnosed pre-symptomatic* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_1d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_1u
+
+<br>
+
+This is the infectivity of *undiagnosed pre-symptomatic* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_1u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_2d
+
+<br>
+
+This is the infectivity of *diagnosed asymptomatic* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_2d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_2u
+
+<br>
+
+This is the infectivity of *undiagnosed asymptomatic* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_2u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_md
+
+<br>
+
+This is the infectivity of *diagnosed mildly infected* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_md"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_sd
+
+<br>
+
+This is the infectivity of *diagnosed severely infected* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_sd"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_a_su
+
+<br>
+
+This is the infectivity of *undiagnosed severely infected* individuals relative to undiagnosed mildly infected individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_a_su"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_b_b
+
+<br>
+
+This is the effective contact rate, which encompasses all of the biological and behavioral considerations that influence contacts between individuals that lead to transmission.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_b_b"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_12u
+
+<br>
+
+This is the rate at which *undiagnosed pre-symptomatic* individuals become undiagnosed and asymptomatic, never to develop symptoms.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_12u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_1mu
+
+<br>
+
+This is the rate at which *undiagnosed pre-symptomatic* individuals become undiagnosed with mild infection symptoms.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_1mu"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_1su
+
+<br>
+
+This is the rate at which *undiagnosed pre-symptomatic* individuals become undiagnosed with severe infection symptoms.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_1su"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_ceil
+
+<br>
+
+This is the maximum number of people who can be in critical care at a single time step. 
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_ceil"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_e1u
+
+<br>
+
+This is the rate at which *exposed, but not infectious*, individuals become undiagnosed pre-symptomatic infectious individuals.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_e1u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_d_1
+
+<br>
+
+This is the rate at which *pre-symptomatic* individuals get diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_d_1"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_d_2
+
+<br>
+
+This is the rate at which *truly asymptomatic* individuals get diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_d_2"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_d_m
+
+<br>
+
+This is the rate at which *mildly infected* individuals get diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_d_m"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_d_s
+
+<br>
+
+This is the rate at which *severely infected* individuals get diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_d_s"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_ddf
+
+<br>
+
+This is the fraction of deaths that happened outside of the hospital where COVID-19 is identified as the cause of death. 
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_ddf"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_delta_c
+
+<br>
+
+This is the rate at which people in *critical care* die.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_delta_c"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_delta_h
+
+<br>
+
+This is the rate at which people in the *hospital* die before going to critical care.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_delta_h"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_delta_h_adjust
+
+<br>
+
+This is the factor by which you multiply the `delta_h` parameter if you want to decrease the rate at a specific point in time. 
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_delta_h_adjust"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_delta_su
+
+<br>
+
+This is the rate at which *undiagnosed, severely infected* people die.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_delta_su"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_eta_u
+
+<br>
+
+This is the rate at which *undiagnosed severely infected* people are hospitalised.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_eta_u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_FOIadjust
+
+<br>
+
+This is the factor by which you multiply the force of infection if you want to decrease the rate at a specific point in time. 
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_FOIadjust"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_h_ceil
+
+<br>
+
+The maximum number of people who can be in the hospital at a given time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_h_ceil"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_hdf
+
+<br>
+
+The fraction of all people who go to the hospital with COVID-19 that are actually diagnosed with COVID-19.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_hdf"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_r_2u
+
+<br>
+
+This is the rate at which *undiagnosed truly asymptomatic infected* individuals recover.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_2u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_r_h
+
+<br>
+
+This is the rate at which *hospitalised* individuals recover, without going to critical care.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_h"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_r_mu
+
+<br>
+
+This is the rate at which *undiagnosed mildly infected* individuals recover.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_mu"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_r_p
+
+<br>
+
+This is the rate at which individuals in the *post-critical care ward* recover.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_p"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_rho
+
+<br>
+
+This is the rate that those in the *critical care ward* move to the post-critical care ward.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_rho"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_theta
+
+<br>
+
+This is the rate that those who are *hospitalised* move to the critical care ward.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_theta"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+## Compartments
+
+<br>
+
+These variables refer to the number of people who are in a specific disease state at a given point in time.
+
+<br>
+
+### S
+
+<br>
+
+This is the total number of people who are *susceptible to infection* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "S"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### E_d
+
+<br>
+
+This is the total number of people who are *diagnosed with COVID-19, but not infectious yet* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "E_d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### E_u
+
+<br>
+
+This is the total number of people who are *undiagnosed and infected* with COVID-19, but not infectious yet at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "E_u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_1d
+
+<br>
+
+This is the total number of people who are *diagnosed and pre-symptomatic* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_1d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_1u
+
+<br>
+
+This is the total number of people who are *undiagnosed and pre-symptomatic* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_1u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_2d
+
+<br>
+
+This is the total number of people who are *diagnosed and asymptomatic* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_2d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_2u
+
+<br>
+
+This is the total number of people who are *undiagnosed and asymptomatic* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_2u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_md
+
+<br>
+
+This is the total number of people who are *diagnosed and mildly infected* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_md"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_mu
+
+<br>
+
+This is the total number of people who are *undiagnosed and mildly infected* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_mu"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_sd
+
+<br>
+
+This is the total number of people who are *diagnosed and severely infected* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_sd"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### I_su
+
+<br>
+
+This is the total number of people who are *undiagnosed and severely infected* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "I_su"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### R_2d
+
+<br>
+
+This is the total number of *diagnosed asymptomatic* people who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_2d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+<br>
+
+### R_2u
+
+<br>
+
+This is the total number of *undiagnosed asymptomatic* people who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_2u"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### R_md
+
+<br>
+
+This is the total number of *diagnosed mildly infected* people who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_md"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### R_mu
+
+<br>
+
+This is the total number of *undiagnosed mildly infected* people who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_mu"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### H
+
+<br>
+
+This is the total number of people who are *hospitalised*, but not in critical care, at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "H"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### R_h
+
+<br>
+
+This is the total number of *hospitalised* people who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_h"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### C
+
+<br>
+
+This is the total number of people in *critical care* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "C"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### P
+
+<br>
+
+This is the total number of people who are *post-critical care* at a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "P"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### R_c
+
+<br>
+
+This is the total number of people who were *in critical care* who had recovered by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R_c"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### D_s
+
+<br>
+
+This is the total number of *severely infected, but not hospitalised* individuals that had died by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "D_s"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### D_h
+
+<br>
+
+This is the total number of *hospitalised* individuals that had died by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "D_h"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### D_c
+
+<br>
+
+This is the total number of individuals who were in *critical care* that had died by a specific time step.
+
+<br>
+
+```{r, include = FALSE}
+var <- "D_c"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+## Flows
+
+<br>
+
+These are variables produced by the model that represent the cumulative number of people who were in a given disease state by a specific point in time. 
+
+<br>
+
+## Compartment Combinations
+
+<br>
+
+These variables that were created from different combinations of the compartmental variables. 
+
+<br>
+
+
+

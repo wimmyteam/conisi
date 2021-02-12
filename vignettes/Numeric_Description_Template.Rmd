@@ -1,0 +1,33 @@
+
+#### Summary Table
+
+```{r sum_tab}
+# Summarise the variable at the halfway point in the simulation.
+tab <- df %>%
+  filter(time == round(max(time) / 2)) %>%
+  summarise(Minimum = min(.data[[var]]),
+            `25th Percentile` = quantile(.data[[var]], probs = 0.25),
+            Median = median(.data[[var]]),
+            Mean = mean(.data[[var]]),
+            `75th Percentile` = quantile(.data[[var]], probs = 0.75),
+            Maximum = max(.data[[var]]))
+  
+tab %>%
+  kbl(caption = paste("Summary of", var, "at the halfway point in the simulation.")) %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+```
+
+#### Distribution
+
+```{r sum_dist}
+
+df %>%
+  ggplot(aes(x = .data[[var]])) +
+  geom_density(fill = "slateblue", alpha = 0.80) +
+  ylab("Density") +
+  theme_bw() 
+
+```
+
+
