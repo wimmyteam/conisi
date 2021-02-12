@@ -78,7 +78,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       ) * FOIadjust * S / pop_size
 
       ContribNonSympt <- (
-        a_1u * ( + b_b) * I_1u +
+        a_1u * b_b * I_1u +
         a_2u * b_b * I_2u +
         a_1d * b_b * I_1d +
         a_2d * b_b * I_2d
