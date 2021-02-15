@@ -143,7 +143,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
 
   #Prepend parameters with a "par_"
   df4 <- df3 %>%
-    dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:theta | r_2d:zeta_d)
+    dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:theta | r_2d:d_e)
 
   return(df4)
 
