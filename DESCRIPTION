@@ -27,6 +27,6 @@ Imports:
 Suggests: 
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
     prettydoc
 VignetteBuilder: knitr
