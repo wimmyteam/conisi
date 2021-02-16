@@ -13,7 +13,9 @@ tab <- df %>%
             Maximum = max(.data[[var]]))
   
 tab %>%
-  kbl(caption = paste("Summary of", var, "at the halfway point in the simulation.")) %>%
+  kbl(caption = paste("Summary of", var, "at the halfway point in the simulation."),
+      digits = 3,
+      format.args = list(big.mark = ",", scientific = FALSE)) %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 ```
@@ -22,11 +24,20 @@ tab %>%
 
 ```{r sum_dist}
 
-df %>%
+if(tab$Minimum[1] == tab$Maximum[1]) {
+  
+  cat(var, "does not vary. We always use the value:", prettyNum(tab$Minimum[1], big.mark = ",", scientific = FALSE))
+  
+} else {
+  
+  df %>%
   ggplot(aes(x = .data[[var]])) +
-  geom_density(fill = "slateblue", alpha = 0.80) +
+  geom_density(fill = "turquoise4", alpha = 0.80) +
   ylab("Density") +
   theme_bw() 
+  
+}
+
 
 ```
 

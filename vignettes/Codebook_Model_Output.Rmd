@@ -2,7 +2,13 @@
 title: "CONISI Codebook"
 author: "Prepared by: Roxanne Beauclair (roxanne.beauclair@wimmy.co.za)"
 date: 'Last updated on: `r lubridate::today()`'
-output: rmarkdown::html_vignette
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    highlight: vignette
+    toc: true
+    toc_depth: 2
+toc-title: "Table of Contents"
 vignette: >
   %\VignetteIndexEntry{CONISI Codebook}
   %\VignetteEngine{knitr::rmarkdown}
@@ -56,7 +62,7 @@ df <- conisi::mutate_model_output(modelOutput,
 ```
 
 
-# Metadata
+# **Metadata**
 
 <br>
 
@@ -65,7 +71,7 @@ df <- conisi::mutate_model_output(modelOutput,
 
 <br>
 
-# Description of Variables
+# **Description of Variables**
 
 <br>
 
@@ -73,7 +79,7 @@ There are five different types of variables: identifiers, parameters, compartmen
 
 <br>
 
-## Indentifiers
+## **Identifiers**
 
 <br>
 
@@ -81,7 +87,7 @@ These variables in combination uniquely identify each row in the dataset.
 
 <br>
 
-### experiment
+### experiment 
 
 <br>
 
@@ -107,15 +113,15 @@ This is the conversion of the `time` variable into a date in the real world base
 
 <br>
 
-## Parameters
+## **Parameters**
 
 <br>
 
-The parameter variables were used as inputs into the model. They govern the rates at which people in the population move from one compartment (i.e. disease/health state) to another. Each model run (i.e. experiment) uses a unique set of parameters. The parameters will be the same across all time steps for that particular model run. Parameter variables are prefixed with "par_".
+The parameter variables were used as inputs into the model. They govern the rates at which people in the population move from one compartment (i.e. disease/health state) to another. Each model run (i.e. experiment) uses a unique set of parameters. The parameters are mostly the same across all time steps for that particular model run, but a few of the parameters are time-varying. Parameter variables are prefixed with "par_".
 
 <br>
 
-### par_a_1d
+### par_a_1d 
 
 <br>
 
@@ -689,7 +695,153 @@ var <- "par_theta"
 
 ```
 
-## Compartments
+<br>
+
+### par_r_2d
+
+<br>
+
+This is the rate that those who are *diagnosed and asymptomatic* recover.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_2d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_r_md
+
+<br>
+
+This is the rate that those who are *diagnosed and mildly infected* recover.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_r_md"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_12d
+
+<br>
+
+This is the rate that those who are *diagnosed and pre-symptomatic* become a truly asymptomatic infected individual.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_12d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_1md
+
+<br>
+
+This is the rate that those who are *diagnosed and pre-symptomatic* become a mildly infected individual.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_1md"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_c_1sd
+
+<br>
+
+This is the rate that those who are *diagnosed and pre-symptomatic* become a severely infected individual.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_c_1sd"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_eta_d
+
+<br>
+
+This is the rate that those who are *diagnosed and severely infected* become hosptialised.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_eta_d"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_delta_sd
+
+<br>
+
+This is the rate that those who are *diagnosed and severely infected* die without ever going to the hospital.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_delta_sd"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### par_d_e
+
+<br>
+
+This is the rate that *undiagnosed exposed, but not infectious* individuals become diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "par_d_e"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+## **Compartments**
 
 <br>
 
@@ -861,15 +1013,15 @@ var <- "I_mu"
 
 ### I_sd
 
-<br>
-
-This is the total number of people who are *diagnosed and severely infected* at a specific time step.
-
-<br>
-
 ```{r, include = FALSE}
 var <- "I_sd"
 ```
+
+<br>
+
+This is the total number of people who are *diagnosed and severely infected* at a specific time step. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
 
 ```{r, child = "Numeric_Description_Template.Rmd"}
 
@@ -1007,15 +1159,15 @@ var <- "R_h"
 
 ### C
 
-<br>
-
-This is the total number of people in *critical care* at a specific time step.
-
-<br>
-
 ```{r, include = FALSE}
 var <- "C"
 ```
+
+<br>
+
+This is the total number of people in *critical care* at a specific time step. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
 
 ```{r, child = "Numeric_Description_Template.Rmd"}
 
@@ -1113,7 +1265,7 @@ var <- "D_c"
 
 <br>
 
-## Flows
+## **Flows**
 
 <br>
 
@@ -1121,13 +1273,1163 @@ These are variables produced by the model that represent the cumulative number o
 
 <br>
 
-## Compartment Combinations
+### ConfirmedCases
+
+```{r, include = FALSE}
+var <- "ConfirmedCases"
+```
 
 <br>
 
-These variables that were created from different combinations of the compartmental variables. 
+This is the cumulative number of cases that have been diagnosed by a specific time. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
 
 <br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ContribAll
+
+<br>
+
+This is the cumulative number of all people - diagnosed and undiagnosed - who have ever been infected by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "ContribAll"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ContribNonSympt
+
+<br>
+
+This is the cumulative cases caused by asymptomatic infections at a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "ContribNonSympt"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### eta_d_cumul_flow
+
+<br>
+
+This is the cumulative number of hospitalizations, among diagnosed cases, by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "eta_d_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### eta_u_cumul_flow
+
+<br>
+
+This is the cumulative number of hospitalizations, among undiagnosed infections, by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "eta_u_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### r_h_cumul_flow
+
+<br>
+
+This is the cumulative number of recoveries, among those in hospital (not critical care), by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "r_h_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### theta_cumul_flow
+
+<br>
+
+This is the cumulative of hospitalised cases that have gone to critical care, by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "theta_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Asymp_diagnozed_cumul_flow
+
+<br>
+
+This is the cumulative number of diagnoses among asymptomatic cases, by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "Asymp_diagnozed_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Symp_diagnozed_cumul_flow
+
+<br>
+
+This is the cumulative number of diagnoses among symptomatic cases, by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "Symp_diagnozed_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Asymp_inf_cumul_flow
+
+<br>
+
+This is the cumulative number of pre-symptomatic infections that became asymptomatic by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "Asymp_inf_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Symp_inf_cumul_flow
+
+<br>
+
+This is the cumulative number of pre-symptomatic infections that became symptomatic by a specific time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "Symp_inf_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+## **Combinations**
+
+<br>
+
+These variables that were created from different combinations of the compartmental, flow, and parameter variables. 
+
+<br>
+
+### R0
+
+<br>
+
+This is the basic reproduction number. It is the average number of secondary infections produced by one case in a population where everyone is still susceptible.
+
+<br>
+
+```{r, include = FALSE}
+var <- "R0"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Reff
+
+<br>
+
+This is the effective reproductive number. It is the average number of secondary infections produced by one case in a population where some people are susceptible and others are not susceptible because they have been vaccinated or infected.
+
+<br>
+
+```{r, include = FALSE}
+var <- "Reff"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AllInfections
+
+<br>
+
+This is the total number of people who are exposed or infected, whether diagnosed or undiagnosed, at single point in time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "AllInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ActiveInfections
+
+```{r, include = FALSE}
+var <- "ActiveInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who are infected, whether diagnosed or undiagnosed, who we assume are actively transmitting infection. It excludes those who are exposed, but not yet infectious, as well as those who are hospitalised or in critical care. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SymptKnownAsymptInfections
+
+<br>
+
+This is the total number of people at a single point in time who symptomatic infections, whether diagnosed or undiagnosed, as well as diagnosed asymptomatic infections. It excludes those who are hospitalised or in critical care.
+
+<br>
+
+```{r, include = FALSE}
+var <- "SymptKnownAsymptInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SymptKnownInfections
+
+
+```{r, include = FALSE}
+var <- "SymptKnownInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed symptomatic infection (mild or severe). It excludes those who are hospitalised or in critical care. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SymptUnknownInfections
+
+<br>
+
+This is the total number of people at a single point in time who have a undiagnosed symptomatic infection (mild or severe). It excludes those who are hospitalised or in critical care.
+
+<br>
+
+```{r, include = FALSE}
+var <- "SymptUnknownInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AsymptKnownInfections
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed asymptomatic infection. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, include = FALSE}
+var <- "AsymptKnownInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AsymptUnknownInfections
+
+<br>
+
+This is the total number of people at a single point in time who have an undiagnosed asymptomatic infection.
+
+<br>
+
+```{r, include = FALSE}
+var <- "AsymptUnknownInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SymptInfections
+
+```{r, include = FALSE}
+var <- "SymptInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a symptomatic infection (diagnosed and undiagnosed), but not hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AsymptInfections
+
+```{r, include = FALSE}
+var <- "AsymptInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have an asymptomatic infection (diagnosed and undiagnosed). In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### KnownInfections
+
+```{r, include = FALSE}
+var <- "KnownInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed infection (not including hospitalised patients). In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### UnknownInfections
+
+<br>
+
+This is the total number of people at a single point in time who have an undiagnosed infection.
+
+<br>
+
+```{r, include = FALSE}
+var <- "UnknownInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SevereKnownMildInfections
+
+<br>
+
+This is the total number of people at a single point in time who have a severe infection (diagnosed and undiagnosed), or a diagnosed mild infection (not including hospitalised patients).
+
+<br>
+
+```{r, include = FALSE}
+var <- "SevereKnownMildInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### SevereInfections
+
+```{r, include = FALSE}
+var <- "SevereInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a severe infection (diagnosed and undiagnosed), but not including hospitalised patients. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hospitalizations
+
+```{r, include = FALSE}
+var <- "Hospitalizations"
+```
+
+<br>
+
+This is the total number of people at a single point in time who are hospitalised. It includes those in normal, critical care, and post-critical care units. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_I_sd
+
+```{r, include = FALSE}
+var <- "Hosp_I_sd"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a severe diagnosed infection or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_SevereInfections
+
+```{r, include = FALSE}
+var <- "Hosp_SevereInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a severe infection (diagnosed or undiagnosed) or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_SevereKnownMildInfections
+
+```{r, include = FALSE}
+var <- "Hosp_SevereKnownMildInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed mild infection, severe infection (diagnosed or undiagnosed) or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_SymptInfections
+
+```{r, include = FALSE}
+var <- "Hosp_SymptInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a symptomatic infection (diagnosed or undiagnosed) or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_SymptKnownAsymptInfections
+
+```{r, include = FALSE}
+var <- "Hosp_SymptKnownAsymptInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed asymptomatic infection, symptomatic infection (diagnosed or undiagnosed), or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_ActiveInfections
+
+```{r, include = FALSE}
+var <- "Hosp_ActiveInfections"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have an active infection or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Hosp_SymptKnownInfections
+
+```{r, include = FALSE}
+var <- "Hosp_SymptKnownInfections"
+```
+
+
+<br>
+
+This is the total number of people at a single point in time who a diagnosed symptomatic infection (mild or severe) or are hospitalised. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### hosp_nonicu
+
+```{r, include = FALSE}
+var <- "hosp_nonicu"
+```
+
+<br>
+
+This is the total number of cases at a single point in time who are in any non-critical care ward. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### deaths_hosp
+
+```{r, include = FALSE}
+var <- "deaths_hosp"
+```
+
+<br>
+
+This is the total number of deaths among people who were hospitalised in a normal ward or critical care unit. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### NotWorking
+
+```{r, include = FALSE}
+var <- "NotWorking"
+```
+
+<br>
+
+This is the total number of people at a single point in time who have a diagnosed infection (pre-symptomatic, asymptomatic, mild or severe) or are hospitalised. Theoretically, these people would not be at work at this point in time. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ReturnWork_cumul_flow 
+
+<br>
+
+This is the total number of people who have recovered from an infection by a specific point in time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "ReturnWork_cumul_flow"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AllDeaths
+
+```{r, include = FALSE}
+var <- "AllDeaths"
+```
+
+<br>
+
+This is the total number of people who have died by a specific point in time. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Prevalence
+
+```{r, include = FALSE}
+var <- "Prevalence"
+```
+
+<br>
+
+This is the fraction of the population who has an active infection at a single point in time, not including hospitalised patients. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Exposure
+
+```{r, include = FALSE}
+var <- "Exposure"
+```
+
+<br>
+
+This is the fraction of the population who has been exposed or infected by a specific point in time. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracSymptKnown
+
+<br>
+
+This is the fraction of active infections (not hospitalised) at a single point in time, which are symptomatic and diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracSymptKnown"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracSymptUnknown
+
+<br>
+
+This is the fraction of active infections (not hospitalised) at a single point in time, which are symptomatic and undiagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracSymptUnknown"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracAsymptKnown
+
+<br>
+
+This is the fraction of active infections (not hospitalised) at a single point in time, which are asymptomatic and diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracAsymptKnown"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracAsymptUnknown
+
+<br>
+
+This is the fraction of active infections (not hospitalised) at a single point in time, which are asymptomatic and undiagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracAsymptUnknown"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracHospSymptKnown
+
+<br>
+
+This is the fraction of hospitalised or symptomatic infections at a single point in time, which are diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracHospSymptKnown"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### FracAsymptKnown2
+
+<br>
+
+This is the fraction of asymptomatic infections at a single point in time, which are diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "FracAsymptKnown2"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### idf
+
+<br>
+
+This is the fraction of all infections at a single point in time, which are diagnosed.
+
+<br>
+
+```{r, include = FALSE}
+var <- "idf"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ifr
+
+<br>
+
+This is the fraction of all people who have been infected, which have died by a point in time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "ifr"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### cfr
+
+<br>
+
+This is the fraction of all diagnosed infections, which have died by a point in time.
+
+<br>
+
+```{r, include = FALSE}
+var <- "cfr"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### AllDailyInfections
+
+<br>
+
+This is the number of new infections that take place each day. It includes diagnosed, undiagnosed, asymptomatic, symptomatic.
+
+<br>
+
+```{r, include = FALSE}
+var <- "AllDailyInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### NonSymptDailyInfections
+
+<br>
+
+This is the number of new infections caused by asymptomatic cases. It includes diagnosed and undiagnosed infections.
+
+<br>
+
+```{r, include = FALSE}
+var <- "NonSymptDailyInfections"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### RelContribNonSympt
+
+<br>
+
+This is the fraction of all new cases each day, which are caused by asymptomatic infections.
+
+<br>
+
+```{r, include = FALSE}
+var <- "RelContribNonSympt"
+```
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### NewCases
+
+```{r, include = FALSE}
+var <- "NewCases"
+```
+
+<br>
+
+This is the number of new diagnosed infections each day. It includes asymptomatic and symptomatic infections. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### NewDeaths
+
+```{r, include = FALSE}
+var <- "NewDeaths"
+```
+
+<br>
+
+This is the number of new deaths each day. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### eta_d_flow
+
+```{r, include = FALSE}
+var <- "eta_d_flow"
+```
+
+<br>
+
+This is the number of new hospitalisations each day that occur from diagnosed cases. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### eta_u_flow
+
+```{r, include = FALSE}
+var <- "eta_u_flow"
+```
+
+<br>
+
+This is the number of new hospitalisations each day that occur from undiagnosed infections. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### r_h_flow
+
+```{r, include = FALSE}
+var <- "r_h_flow"
+```
+
+<br>
+
+This is the number of new recoveries each day that occur from hospitalised (not critical care) cases. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### delta_h_flow
+
+
+```{r, include = FALSE}
+var <- "delta_h_flow"
+```
+
+<br>
+
+This is the number of new deaths each day that occur from hospitalised (not critical care) cases. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### theta_flow 
+
+```{r, include = FALSE}
+var <- "theta_flow"
+```
+
+<br>
+
+This is the number of new patients that enter critical care each day. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Symp_diagnozed_flow
+
+```{r, include = FALSE}
+var <- "Symp_diagnozed_flow"
+```
+
+<br>
+
+This is the number of newly diagnosed symptomatic infections that occur each day. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### Asymp_diagnozed_flow
+
+```{r, include = FALSE}
+var <- "Asymp_diagnozed_flow"
+```
+
+<br>
+
+This is the number of newly diagnosed asymptomatic infections that occur each day. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
+<br>
+
+### ReturnWork_flow
+
+```{r, include = FALSE}
+var <- "ReturnWork_flow"
+```
+
+<br>
+
+This is the number of employees (newly recovered cases) that return to work each day. In this dataset there are also `r paste0(var, "_mean")`, `r paste0(var, "_min")`, and `r paste0(var, "_max")` variables. These have the same definition, except they represent the mean, min and max values across all experiments at a given time point.
+
+<br>
+
+```{r, child = "Numeric_Description_Template.Rmd"}
+
+```
+
 
 
 
