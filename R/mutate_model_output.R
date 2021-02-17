@@ -33,7 +33,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
   if(!is.null(start_date)){
 
   df <- df %>%
-    mutate(date = start_date + time + report_lag)
+    dplyr::mutate(date = start_date + time + report_lag)
 
   }
 
