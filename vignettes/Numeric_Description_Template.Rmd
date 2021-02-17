@@ -4,8 +4,8 @@
 ```{r sum_tab}
 # Summarise the variable at the halfway point in the simulation.
 tab <- df %>%
-  filter(time == round(max(time) / 2)) %>%
-  summarise(Minimum = min(.data[[var]]),
+  dplyr::filter(time == round(max(time) / 2)) %>%
+  dplyr::summarise(Minimum = min(.data[[var]]),
             `25th Percentile` = quantile(.data[[var]], probs = 0.25),
             Median = median(.data[[var]]),
             Mean = mean(.data[[var]]),
@@ -13,10 +13,10 @@ tab <- df %>%
             Maximum = max(.data[[var]]))
   
 tab %>%
-  kbl(caption = paste("Summary of", var, "at the halfway point in the simulation."),
+  kableExtra::kbl(caption = paste("Summary of", var, "at the halfway point in the simulation."),
       digits = 3,
       format.args = list(big.mark = ",", scientific = FALSE)) %>%
-  kable_classic(full_width = F, html_font = "Cambria")
+  kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 
 ```
 
@@ -31,10 +31,10 @@ if(tab$Minimum[1] == tab$Maximum[1]) {
 } else {
   
   df %>%
-  ggplot(aes(x = .data[[var]])) +
-  geom_density(fill = "turquoise4", alpha = 0.80) +
-  ylab("Density") +
-  theme_bw() 
+  ggplot2::ggplot(aes(x = .data[[var]])) +
+    geom_density(fill = "turquoise4", alpha = 0.80) +
+    ylab("Density") +
+    theme_bw() 
   
 }
 

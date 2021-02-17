@@ -30,12 +30,7 @@ options(knitr.duplicate.label = "allow")
 
 ```{r setup, include = FALSE}
 
-# ====================
-# Loading dependencies
-# ====================
-library(conisi)
 library(tidyverse)
-library(kableExtra)
 
 # ===================
 # Relative file paths
@@ -53,11 +48,6 @@ df <- conisi::mutate_model_output(modelOutput,
                           report_lag = 2,
                           start = lubridate::ymd("2020-03-12"))
 
-# =============
-# Plot settings 
-# =============
-
-#theme <- theme(axis.text.x = element_text(angle = 10, size = 8))
 
 ```
 

@@ -19,6 +19,7 @@ Imports:
     tibble,
     readr,
     tidyr,
+    ggplot2,
     deSolve,
     magrittr,
     lubridate,
@@ -28,5 +29,6 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    prettydoc
+    prettydoc,
+    kableExtra
 VignetteBuilder: knitr
