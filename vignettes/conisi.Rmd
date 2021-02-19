@@ -1,0 +1,98 @@
+---
+title: "conisi"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{conisi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Installation
+
+You can install the released version of conisi from github with:
+
+```r
+devtools::install_github(
+  "wimmyteam/conisi",
+  ref="master"
+  )
+```
+
+## Run a single simulation
+
+Load the parameters
+
+``` r
+
+  file_path <- system.file("test-data", "manually_edited_parameters.csv", package="conisi")
+  # You would normally provide your own parameter file
+  
+  parameters <- conisi::load_parameters(
+    file_path, 
+    sim_name = "sa_37", 
+    start_date = lubridate::ymd("2020-03-10")
+  )
+```
+
+Set the size of simulated population and length of simulation
+
+``` r
+  pop <- 1000000 #The size of the population to simulate
+  days <- 100 #The number of days to simulate
+```
+
+Run the simulation and calculate pandemic metrics
+``` r
+  mod_result <- COVIDmodel_run_and_mutate(par_table, pop, days) # Runs the simulation
+```
+
+Calculate the RMSE
+
+``` r
+  # Load the target data
+  load(system.file("test-data", "observed_data.RData", package="conisi")) #Loads test_data
+  
+  # start_date determines which date t = 0 from the model output will be matched to.
+  start_date <- test_data$date[1]
+
+  rmse <- modelrmse(modelOutput = mod_result,
+                    start_date,
+                    test_data,
+                    weights = c(1, 0.5)
+  )
+
+```
+
+## Run many simulations (perhaps using azure)
+
+``` r
+  # Get the parameters somewhere, needs "experiment" column.
+  parameters <- get_par_table()
+  
+  # TODO Update the conisi::load_parameters function to allow loading many experiments from a single file.
+  
+  # The conisi package uses the foreach package to run simulations in parallel.
+  # This required a bit of preparation
+  availablecores <- 2
+  doParallel::registerDoParallel(cores = availablecores)
+  
+  ## Alternatively to run in the cloud on Azure:
+  # library(doAzureParallel)
+  # setCredentials("../credentials.json")
+  # cluster <- makeCluster("cluster.json")
+  # registerDoAzureParallel(cluster)
+  # getDoParWorkers()
+  
+  # Actually run the simulations
+  mod_result <- COVIDmodel_run_and_mutate_many(xparm_table, pop, 100)
+
+  ## If using azure, remember to turn off the cluster when you are done
+  # stopCluster(cluster)
+```

@@ -10,17 +10,31 @@
 #'   the numbers in each compartment at a given time.
 #' @param pop Integer The size of the modeled population
 #'
+#' @param start_date Date This is the start date for the local epidemic and it is used for adding a
+#'   date column to the output.
+#'
+#' @param  report_lag Integer This is the number of days we assume pass between the infection and
+#'   when it is first reported.
+#'
 #' @export
 #'
 #' @importFrom magrittr %>%
 
-mutate_model_output <- function(df, pop) {
+mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
   fraction <- function(a, b)
   {
     ifelse(b > 1e-10, a/b, NA)
+  }
+
+  # Do we need to create a date variable
+  if(!is.null(start_date)){
+
+  df <- df %>%
+    dplyr::mutate(date = start_date + time + report_lag)
+
   }
 
   # Create vars that apply to each row
@@ -74,6 +88,7 @@ mutate_model_output <- function(df, pop) {
            Hosp_SymptInfections = SymptInfections + Hospitalizations,
            Hosp_SymptKnownAsymptInfections = SymptKnownAsymptInfections + Hospitalizations,
            Hosp_ActiveInfections = ActiveInfections + Hospitalizations,
+           Hosp_SymptKnownInfections = SymptKnownInfections + Hospitalizations,
            hosp_nonicu = H + P,
            deaths_hosp = D_h + D_c,
            NotWorking = KnownInfections + Hospitalizations,
@@ -85,50 +100,50 @@ mutate_model_output <- function(df, pop) {
            FracSymptUnknown = fraction(SymptUnknownInfections, ActiveInfections),
            FracAsymptKnown = fraction(AsymptKnownInfections, ActiveInfections),
            FracAsymptUnknown = fraction(AsymptUnknownInfections, ActiveInfections),
+           FracHospSymptKnown = fraction(Hosp_SymptKnownInfections, Hosp_SymptInfections),
+           FracAsymptKnown2 = fraction(AsymptKnownInfections, AsymptInfections),
            idf = fraction(KnownInfections + H + P + C, ActiveInfections + H + P + C),
            ifr = fraction(AllDeaths, ContribAll), # All deaths at a point in time / Cumulative Incidence (all people who have been infected)
            cfr = fraction(AllDeaths, ConfirmedCases))#, # Cum deaths at a point in time / all cumulative detected cases
-           #local_epi_start_date = local_epi_start_date,
-           #date = local_epi_start_date + time + report_lag)
 
   # Create vars that apply to each experiment
   df2 <- df1 %>%
     dplyr::arrange(experiment, time) %>%
     dplyr::group_by(experiment) %>%
     dplyr::mutate(AllDailyInfections = ContribAll - lag(ContribAll, default = 0),
-           NonSymptDailyInfections = ContribNonSympt - lag(ContribNonSympt, default = 0),
-           RelContribNonSympt = fraction(NonSymptDailyInfections, AllDailyInfections),
-           NewCases = ConfirmedCases - lag(ConfirmedCases, default = 0),
-           NewDeaths = AllDeaths - lag(AllDeaths, default = 0),
-           eta_d_flow = eta_d_cumul_flow - lag(eta_d_cumul_flow, default = 0),
-           eta_u_flow = eta_u_cumul_flow - lag(eta_u_cumul_flow, default = 0),
-           r_h_flow = r_h_cumul_flow - lag(r_h_cumul_flow, default = 0),
-           delta_h_flow = delta_h_cumul_flow - lag(delta_h_cumul_flow, default = 0),
-           theta_flow = theta_cumul_flow - lag(theta_cumul_flow, default = 0),
-           Symp_diagnozed_flow = Symp_diagnozed_cumul_flow - lag(Symp_diagnozed_cumul_flow, default = 0),
-           Asymp_diagnozed_flow = Asymp_diagnozed_cumul_flow - lag(Asymp_diagnozed_cumul_flow, default = 0),
-           ReturnWork_flow = ReturnWork_cumul_flow - lag(ReturnWork_cumul_flow, default = 0))
+                  NonSymptDailyInfections = ContribNonSympt - lag(ContribNonSympt, default = 0),
+                  RelContribNonSympt = fraction(NonSymptDailyInfections, AllDailyInfections),
+                  NewCases = ConfirmedCases - lag(ConfirmedCases, default = 0),
+                  NewDeaths = AllDeaths - lag(AllDeaths, default = 0),
+                  eta_d_flow = eta_d_cumul_flow - lag(eta_d_cumul_flow, default = 0),
+                  eta_u_flow = eta_u_cumul_flow - lag(eta_u_cumul_flow, default = 0),
+                  r_h_flow = r_h_cumul_flow - lag(r_h_cumul_flow, default = 0),
+                  delta_h_flow = delta_h_cumul_flow - lag(delta_h_cumul_flow, default = 0),
+                  theta_flow = theta_cumul_flow - lag(theta_cumul_flow, default = 0),
+                  Symp_diagnozed_flow = Symp_diagnozed_cumul_flow - lag(Symp_diagnozed_cumul_flow, default = 0),
+                  Asymp_diagnozed_flow = Asymp_diagnozed_cumul_flow - lag(Asymp_diagnozed_cumul_flow, default = 0),
+                  ReturnWork_flow = ReturnWork_cumul_flow - lag(ReturnWork_cumul_flow, default = 0))
 
   # Create vars that apply to each time point, by summarized by experiment
   df3 <- df2 %>%
     dplyr::group_by(time) %>%
     dplyr::mutate(dplyr::across(.cols = c(Exposure, ConfirmedCases, NewCases, ActiveInfections, Prevalence,
-                            SevereInfections, I_sd, Hospitalizations, C,
-                            SymptInfections, AsymptInfections, NotWorking,
-                            KnownInfections, SymptKnownInfections, AsymptKnownInfections,
-                            AllDeaths, NewDeaths, Hosp_I_sd, Hosp_SevereInfections,
-                            Hosp_SevereKnownMildInfections, Hosp_SymptInfections,
-                            Hosp_SymptKnownAsymptInfections, Hosp_ActiveInfections,
-                            hosp_nonicu, deaths_hosp,
-                            eta_d_flow, eta_u_flow, r_h_flow, delta_h_flow, theta_flow,
-                            Symp_diagnozed_flow, Asymp_diagnozed_flow, ReturnWork_flow),
+                                          SevereInfections, I_sd, Hospitalizations, C,
+                                          SymptInfections, AsymptInfections, NotWorking,
+                                          KnownInfections, SymptKnownInfections, AsymptKnownInfections,
+                                          AllDeaths, NewDeaths, Hosp_I_sd, Hosp_SevereInfections,
+                                          Hosp_SevereKnownMildInfections, Hosp_SymptInfections,
+                                          Hosp_SymptKnownAsymptInfections, Hosp_ActiveInfections,
+                                          Hosp_SymptKnownInfections, hosp_nonicu, deaths_hosp,
+                                          eta_d_flow, eta_u_flow, r_h_flow, delta_h_flow, theta_flow,
+                                          Symp_diagnozed_flow, Asymp_diagnozed_flow, ReturnWork_flow),
                   .fns = list(mean = mean, min = min, max = max),
                   .names = "{col}_{fn}")) %>%
     dplyr::ungroup()
 
   #Prepend parameters with a "par_"
   df4 <- df3 %>%
-    dplyr::rename_with(function(x){paste("par_", x)}, a_1d:theta | r_2d:zeta_d)
+    dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:theta | r_2d:d_e)
 
   return(df4)
 

@@ -19,10 +19,16 @@ Imports:
     tibble,
     readr,
     tidyr,
+    ggplot2,
     deSolve,
     magrittr,
     lubridate,
     foreach,
     doParallel
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown,
+    prettydoc,
+    kableExtra
+VignetteBuilder: knitr
