@@ -26,7 +26,7 @@ load_parameters <- function(file_path, sim_name = NULL, start_date = NULL) {
     data <- data %>%
     dplyr::mutate(start_time = ifelse(is.na(start_date), 0, start_date - {{start_date}}))
   } else {
-    stopifnot(start_time %in% data)
+    stopifnot("start_time" %in% data)
   }
 
   data <- data %>%

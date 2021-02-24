@@ -65,6 +65,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
       hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
+      upsilon <- ifelse(exists("upsilon"), upsilon, 0.0) # Uses default value of 0.0 if parameter is missing
 
       S_f_E_u <- (
         a_1u * b_b * I_1u +
@@ -272,7 +273,7 @@ model_result_extend <- function(mod_result, par_table) {
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
+COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, start_date=NULL)
 {
   mod_result <- COVIDmodel(parm_table, pop_size, num_days)
 
@@ -289,7 +290,7 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
     dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
     tidyr::fill(everything(), .direction = "down")
 
-  mod_result <- conisi::mutate_model_output(mod_result, pop_size)
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size, start_date)
 
   return(mod_result)
 }
