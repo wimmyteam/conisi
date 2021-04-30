@@ -56,6 +56,9 @@ modelrmse <- function(modelOutput,
   )
   start_time <- as.integer(start_date - date_zero)
 
+  if (start_time > end_time)
+  {stop("Cannot calculate rmse, the predicted and actual values to not intersect in time.")}
+
   # Filter the observed data so only looking at the part that overlaps with with model prediction
   target_data <- target_data %>%
   dplyr::filter(date >= start_date & date <= end_date)
