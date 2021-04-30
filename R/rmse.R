@@ -1,6 +1,7 @@
 
 se <- function(actual, predicted){
-  return((actual - predicted) ^ 2)
+  min_length = min(length(actual), length(predicted))
+  return((actual[1:min_length] - predicted[1:min_length]) ^ 2)
 }
 
 mse <- function(actual, predicted, weights = rep(1, length(actual))){
