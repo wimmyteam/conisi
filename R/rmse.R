@@ -1,7 +1,8 @@
 
 se <- function(actual, predicted){
-  min_length = min(length(actual), length(predicted))
-  return((actual[1:min_length] - predicted[1:min_length]) ^ 2)
+  #min_length = min(length(actual), length(predicted))
+  #return((actual[1:min_length] - predicted[1:min_length]) ^ 2)
+  return((actual - predicted) ^ 2)
 }
 
 mse <- function(actual, predicted, weights = rep(1, length(actual))){
@@ -34,15 +35,35 @@ modelrmse <- function(modelOutput,
                       weights = c(1.0, 0.5),
                       under_report_factor = 1)
 {
+  #TODO this function needs a rewrite badly
 
-  # The last day of observed data to be used
-  end_date <- start_date + max(modelOutput$time)
+  # keep the passed in start_date as reference to time = 0 equivalent
+  date_zero <- start_date
 
-  last_observed_data <- max(target_data$date)
+  # Calculate the date-range where the predicted and target data intersects.
+  # Hacky but, "date" used for target data in date format
+  # "time" also used to indicate date but in "number of days"
+  # from the start of the simulation format used in the model output
+  end_date <- pmin(
+    start_date + max(modelOutput$time),
+    max(target_data$date)
+  )
+  end_time <- as.integer(end_date - date_zero)
+
+  start_date <- pmax(
+    start_date,
+    min(target_data$date)
+  )
+  start_time <- as.integer(start_date - date_zero)
+
+  if (start_time > end_time)
+  {stop("Cannot calculate rmse, the predicted and actual values to not intersect in time.")}
 
   # Filter the observed data so only looking at the part that overlaps with with model prediction
   target_data <- target_data %>%
   dplyr::filter(date >= start_date & date <= end_date)
+
+  modelOutput <- dplyr::filter(modelOutput, time >= start_time & time <= end_time)
 
   target_features <- c(target_data$cum_cases / tail(target_data$cum_cases, 1),
                        target_data$cum_est_deaths / tail(target_data$cum_est_deaths, 1))
