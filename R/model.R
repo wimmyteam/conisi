@@ -15,8 +15,8 @@
 #' @export
 #'
 COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
-  library(tidyverse)
-  library(deSolve)
+  #library(tidyverse)
+  #library(deSolve)
 
   ngroups = length(pop_prop) # number of sub populations in the model
 
