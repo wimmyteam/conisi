@@ -6,27 +6,23 @@
 #' @param parm_table A data frame containing the time-varying parameters (in long format).
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
+#' @param pop_prop A vector with population proportions for sub-population groups
+#' @param contact_matrix A vector with entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments over time
 #'
 #' @importFrom magrittr %>%
 #' @export
 #'
-COVIDmodel <- function(parm_table, pop_size, pop_prop, local_epi_start_date, end_date = today, contact_matrix){
+COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
   library(tidyverse)
   library(deSolve)
-
-  #pop_prop = c(0.03,0.39,0.58) # groups, with 3% healthcare, 39% essential workers, 58% rest
 
   ngroups = length(pop_prop) # number of sub populations in the model
 
   N =  pop_size*pop_prop     # number in each group
 
-  CM = matrix(contact_matrix, nrow = ngroups, byrow = TRUE) #
-
-  # CM = matrix(c(13.6, 10.56, 15.84,
-  #               0.81, 4, 7.19,
-  #               0.55, 4.83, 4), nrow=ngroups, byrow = T)
+  CM = matrix(contact_matrix, nrow = ngroups, byrow = TRUE)
 
   # Named vector containing, starting populations for compartments
   y <- c(S = N - c(1,3,6),
@@ -318,18 +314,18 @@ COVIDmodel <- function(parm_table, pop_size, pop_prop, local_epi_start_date, end
     })
   }
 
-  t_model_end <- round(as.numeric(difftime(end_date, local_epi_start_date)))
-  tspan <- seq(0, t_model_end, 1)
+  tspan <- seq(0, num_days, 1)
 
   model_output <- as.data.frame(
     deSolve::lsoda(
       y,
       tspan,
       model,
-      c(1, 1, 1) # c(100, 1000, 10000) #These are not actually used, just passing it because lsoda wants a vector
+      c(100, 1000, 10000),
+      #These are not actually used, just passing it because lsoda wants a vector
+      hmin = 1e-12, atol = 1e-6
     )
   )
-
   return(model_output)
 }
 
