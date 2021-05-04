@@ -349,14 +349,16 @@ model_result_extend <- function(mod_result, par_table) {
 #' @param parm_table A data frame containing the time-varying parameters (in long format).
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
+#' @param pop_prop A vector with population proportions for sub-population groups
+#' @param contact_matrix A vector with entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments, parameters and other statistics over time
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
+COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 {
-  mod_result <- COVIDmodel(parm_table, pop_size, num_days)
+  mod_result <- COVIDmodel(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 
   if(! "experiment" %in% parm_table){
     parm_table <- dplyr::mutate(parm_table, experiment = 1)
@@ -381,11 +383,13 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
 #' @param parm_table A data frame containing the time-varying parameters (in long format) for multiple experiments.
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
+#' @param pop_prop A vector with population proportions for sub-population groups
+#' @param contact_matrix A vector with entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments, parameters and other statistics over time
 #' @importFrom foreach %dopar%
 #' @export
-COVIDmodel_run_many <- function(parm_table, pop_size, num_days){
+COVIDmodel_run_many <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
 
   experiments <- unique(parm_table$experiment)
 
@@ -396,7 +400,9 @@ COVIDmodel_run_many <- function(parm_table, pop_size, num_days){
 
     exp_result <- COVIDmodel(parm_table = single_experiment_params,
                               pop_size,
-                              num_days)
+                              num_days,
+                              pop_prop,
+                              contact_matrix)
 
     model_result_extend(exp_result, parm_table)
 
@@ -409,12 +415,14 @@ COVIDmodel_run_many <- function(parm_table, pop_size, num_days){
 #' @param parm_table A data frame containing the time-varying parameters (in long format) for multiple experiments.
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
+#' @param pop_prop A vector with population proportions for sub-population groups
+#' @param contact_matrix A vector with entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days){
-  mod_result <- COVIDmodel_run_many(parm_table, pop_size, num_days)
+COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
+  mod_result <- COVIDmodel_run_many(parm_table, pop_size, num_days, pop_prop, contact_matrix)
   conisi::mutate_model_output(mod_result, pop_size)
 }
