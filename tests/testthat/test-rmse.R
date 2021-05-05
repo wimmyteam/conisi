@@ -14,7 +14,7 @@ test_that("rmse works", {
                     weights = c(1, 0.5)
   )
 
-  expect_lt(abs(rmse - 0.3085345), 0.0001)
+  expect_lt(abs(rmse - 0.31747), 0.0001)
 
   #TODO write more tests with varying start and end dates and with many experiments in single mod_result
   #TODO create test data with easily verifiable RMSE such as 1

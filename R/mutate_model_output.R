@@ -96,6 +96,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
            AllDeaths = D_s + D_h + D_c,
            Prevalence = ActiveInfections / pop,
            Exposure = ContribAll / pop,
+           Susceptible = S / pop,
            FracSymptKnown = fraction(SymptKnownInfections, ActiveInfections),
            FracSymptUnknown = fraction(SymptUnknownInfections, ActiveInfections),
            FracAsymptKnown = fraction(AsymptKnownInfections, ActiveInfections),
@@ -127,7 +128,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
   # Create vars that apply to each time point, by summarized by experiment
   df3 <- df2 %>%
     dplyr::group_by(time) %>%
-    dplyr::mutate(dplyr::across(.cols = c(Exposure, ConfirmedCases, NewCases, ActiveInfections, Prevalence,
+    dplyr::mutate(dplyr::across(.cols = c(Exposure, Susceptible, ConfirmedCases, NewCases, ActiveInfections, Prevalence,
                                           SevereInfections, I_sd, Hospitalizations, C,
                                           SymptInfections, AsymptInfections, NotWorking,
                                           KnownInfections, SymptKnownInfections, AsymptKnownInfections,
@@ -143,7 +144,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
 
   #Prepend parameters with a "par_"
   df4 <- df3 %>%
-    dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:theta | r_2d:d_e)
+    dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:upsilon | r_2d:d_e)
 
   return(df4)
 

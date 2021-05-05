@@ -65,6 +65,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
 
       hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
+      upsilon <- ifelse(exists("upsilon"), upsilon, 0.0) # Uses default value of 0.0 if parameter is missing
 
       S_f_E_u <- (
         a_1u * b_b * I_1u +
@@ -145,29 +146,38 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
       P_f_R_c <- r_p * P
 
 
+      # Adding the assumptions of waning immunity: flows from R_* to S, at rate upsilon (simplest possible flow assumptions: constant rate)
+      R_2u_f_S <- upsilon * R_2u
+      R_2d_f_S <- upsilon * R_2d
+      R_mu_f_S <- upsilon * R_mu
+      R_md_f_S <- upsilon * R_md
+      R_h_f_S <- upsilon * R_h
+      R_c_f_S <- upsilon * R_c
+
+
       # Defining the system of differential equations
-      dS <- -S_f_E_u
+      dS <- -S_f_E_u + R_2u_f_S + R_2d_f_S + R_mu_f_S + R_md_f_S + R_h_f_S + R_c_f_S
       dE_u <- -E_u_f_I_1u + S_f_E_u
       dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
       dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
       dI_mu <- -I_mu_f_R_mu - I_mu_f_I_md + I_1u_f_I_mu
       dI_su <- -I_su_f_D_s - I_su_f_H - I_su_f_I_sd + I_1u_f_I_su
-      dR_2u <- I_2u_f_R_2u
-      dR_mu <- I_mu_f_R_mu
+      dR_2u <- I_2u_f_R_2u - R_2u_f_S
+      dR_mu <- I_mu_f_R_mu - R_mu_f_S
 
       dE_d <- -E_d_f_I_1d
       dI_1d <- -I_1d_f_I_2d - I_1d_f_I_md - I_1d_f_I_sd + I_1u_f_I_1d + E_d_f_I_1d
       dI_2d <- -I_2d_f_R_2d + I_2u_f_I_2d + I_1d_f_I_2d
       dI_md <- -I_md_f_R_md + I_mu_f_I_md + I_1d_f_I_md
       dI_sd <- -I_sd_f_D_s - I_sd_f_H + I_su_f_I_sd + I_1d_f_I_sd
-      dR_2d <- I_2d_f_R_2d
-      dR_md <- I_md_f_R_md
+      dR_2d <- I_2d_f_R_2d - R_2d_f_S
+      dR_md <- I_md_f_R_md - R_md_f_S
 
       dH <- -H_f_R_h - H_f_D_h - H_f_C + I_su_f_H + I_sd_f_H
-      dR_h <- H_f_R_h
+      dR_h <- H_f_R_h - R_h_f_S
       dC <- -C_f_P - C_f_D_c + H_f_C
       dP <- -P_f_R_c + C_f_P
-      dR_c <- P_f_R_c
+      dR_c <- P_f_R_c - R_c_f_S
       dD_s <- I_su_f_D_s + I_sd_f_D_s
       dD_h <- H_f_D_h
       dD_c <- C_f_D_c
@@ -264,7 +274,7 @@ model_result_extend <- function(mod_result, par_table) {
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
+COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, start_date=NULL)
 {
   mod_result <- COVIDmodel(parm_table, pop_size, num_days)
 
@@ -281,7 +291,7 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days)
     dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
     tidyr::fill(everything(), .direction = "down")
 
-  mod_result <- conisi::mutate_model_output(mod_result, pop_size)
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size, start_date)
 
   return(mod_result)
 }
