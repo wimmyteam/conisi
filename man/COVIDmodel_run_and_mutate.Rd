@@ -4,7 +4,7 @@
 \alias{COVIDmodel_run_and_mutate}
 \title{Runs the conisi COVID-19 model and applies mutate_model to the result}
 \usage{
-COVIDmodel_run_and_mutate(parm_table, pop_size, num_days)
+COVIDmodel_run_and_mutate(parm_table, pop_size, num_days, start_date = NULL)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format).}
