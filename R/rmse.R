@@ -73,7 +73,7 @@ modelrmse <- function(modelOutput,
   model.df_current <- modelOutput %>%
     dplyr::mutate(AllDeaths = D_s + D_h + D_c,
 #           local_epi_start_date = local_epi_start_date_0,
-           date = start_date + time)
+           date = date_zero + time)
 
   model.df_current <- model.df_current %>%
     dplyr::filter(date >= start_date & date <= max(target_data$date))

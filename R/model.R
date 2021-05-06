@@ -368,8 +368,7 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, 
     dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
     tidyr::fill(everything(), .direction = "down")
 
-  # mod_result <- conisi::mutate_model_output(mod_result, pop_size)
-  mod_result <- mutate_model_output(mod_result, pop_size)
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size, start_date)
 
   return(mod_result)
 }

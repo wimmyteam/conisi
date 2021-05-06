@@ -6,6 +6,8 @@ test_that("rmse works", {
   mod_result <- dplyr::mutate(mod_result, experiment = 1)
 
   load(system.file("test-data", "observed_data.RData", package="conisi"))
+  # test_data
+
   start_date <- test_data$date[1]
 
   rmse <- modelrmse(modelOutput = mod_result,
@@ -14,7 +16,17 @@ test_that("rmse works", {
                     weights = c(1, 0.5)
   )
 
-  expect_lt(abs(rmse - 0.3085345), 0.0001)
+  expect_lt(abs(rmse - 0.31747), 0.0001)
+
+  smaller_target <- test_data %>%
+    dplyr::filter(date >= "2020-04-01")
+
+  rmse <- modelrmse(modelOutput = mod_result,
+                    start_date,
+                    smaller_target,
+                    weights = c(1, 0.5)
+  )
+  expect_lt(abs(rmse - 0.358956), 0.0001)
 
   #TODO write more tests with varying start and end dates and with many experiments in single mod_result
   #TODO create test data with easily verifiable RMSE such as 1
