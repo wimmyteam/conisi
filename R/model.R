@@ -19,7 +19,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days, initial_values = NULL){
 
   # Named vector containing, starting populations for compartments
   if (!is.null(initial_values)) {
-    Y <- initial_values
+    y <- initial_values
   } else {
     y <- c(S = pop_size - 10,
          E_u = 10,  # Number of seeds (people assumed to have entered the country with SARS-CoV-2 infection)
