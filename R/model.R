@@ -6,18 +6,22 @@
 #' @param parm_table A data frame containing the time-varying parameters (in long format).
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
+#' @param initial_values Named Vector The initial values of the compartments as at time = 0
 #'
 #' @return A data frame with the values of the various compartments over time
 #'
 #' @importFrom magrittr %>%
 #' @export
 #'
-COVIDmodel <- function(parm_table, pop_size, num_days){
+COVIDmodel <- function(parm_table, pop_size, num_days, initial_values = NULL){
   # library(tidyverse)
   # library(deSolve)
 
   # Named vector containing, starting populations for compartments
-  y <- c(S = pop_size - 10,
+  if (!is.null(initial_values)) {
+    Y <- initial_values
+  } else {
+    y <- c(S = pop_size - 10,
          E_u = 10,  # Number of seeds (people assumed to have entered the country with SARS-CoV-2 infection)
          I_1u = 0,
          I_2u = 0,
@@ -52,7 +56,8 @@ COVIDmodel <- function(parm_table, pop_size, num_days){
          Symp_diagnozed_cumul_flow = 0, # Cumul flow of diagnoses that were symptomatic at time of diagnosis
          Asymp_inf_cumul_flow = 0, # Cumul flow of infections that stay symptomatic
          Symp_inf_cumul_flow = 0 # Cumul flow of infections that become symptomatic
-  )
+         )
+  }
 
   model <- function(t, y, parms){
 
