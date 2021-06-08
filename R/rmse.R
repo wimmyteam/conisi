@@ -32,7 +32,7 @@ myrmse <- function(model.features, target.features, weights){
 modelrmse <- function(modelOutput,
                       start_date,
                       target_data,
-                      weights = c(1.0, 0.5),
+                      weights = c(1.0, 0.5, 0.8),
                       under_report_factor = 1)
 {
   #TODO this function needs a rewrite badly
@@ -66,12 +66,13 @@ modelrmse <- function(modelOutput,
   modelOutput <- dplyr::filter(modelOutput, time >= start_time & time <= end_time)
 
   target_features <- c(target_data$cum_cases / tail(target_data$cum_cases, 1),
-                       target_data$cum_est_deaths / tail(target_data$cum_est_deaths, 1))
+                       target_data$cum_est_deaths / tail(target_data$cum_est_deaths, 1),
+                       target_data$cum_vaccinations / tail(target_data$cum_vaccinations, 1))
 
   target_features[is.na(target_features)] <- 0
 
   model.df_current <- modelOutput %>%
-    dplyr::mutate(AllDeaths = D_s + D_h + D_c,
+    dplyr::mutate(AllDeaths = D_s1 + D_h1 + D_c1 + D_s2 + D_h2 + D_c2 + D_s3 + D_h3 + D_c3,
 #           local_epi_start_date = local_epi_start_date_0,
            date = date_zero + time)
 
@@ -79,8 +80,13 @@ modelrmse <- function(modelOutput,
     dplyr::filter(date >= start_date & date <= max(target_data$date))
 
   model.df_current <- model.df_current %>%
-    dplyr::mutate(ConfirmedCasesRescaled = ConfirmedCases / tail(target_data$cum_cases, 1),
-           AllDeathsRescaled = AllDeaths / tail(target_data$cum_est_deaths, 1))
+    dplyr::mutate(ConfirmedCases = ConfirmedCases1 + ConfirmedCases2 + ConfirmedCases3,
+                  Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
+                  FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
+                  AllVaccinations = Dose1Vaccinated + FullyVaccinated,
+                  ConfirmedCasesRescaled = ConfirmedCases / tail(target_data$cum_cases, 1),
+                  AllDeathsRescaled = AllDeaths / tail(target_data$cum_est_deaths, 1),
+                  AllVaccinationsRescaled = AllVaccinations / tail(target_data$cum_vaccinations, 1))
 
 
   if(under_report_factor != 1) {
@@ -93,20 +99,21 @@ modelrmse <- function(modelOutput,
     model.df_current <- model.df_current %>%
       dplyr::arrange(experiment, time) %>%
       dplyr::group_by(experiment) %>%
-      dplyr::select(experiment, time, ConfirmedCasesRescaled, AllDeathsRescaled) %>%
+      dplyr::select(experiment, time, ConfirmedCasesRescaled, AllDeathsRescaled, AllVaccinationsRescaled) %>%
       dplyr::ungroup()
   } else {
     model.df_current <- model.df_current %>%
       dplyr::arrange(time) %>%
-      dplyr::select(time, ConfirmedCasesRescaled, AllDeathsRescaled)
+      dplyr::select(time, ConfirmedCasesRescaled, AllDeathsRescaled, AllVaccinationsRescaled)
   }
 
   model_current_wider.df <- model.df_current %>%
     tidyr::pivot_wider(names_from = "time",
-                values_from = c("ConfirmedCasesRescaled", "AllDeathsRescaled"))
+                values_from = c("ConfirmedCasesRescaled", "AllDeathsRescaled", "AllVaccinationsRescaled"))
 
-  weight_vector <- c(rep(weights[1], (length(target_features) / 2)),
-                     rep(weights[2], (length(target_features) / 2)))
+  weight_vector <- c(rep(weights[1], (length(target_features) / 3)),
+                     rep(weights[2], (length(target_features) / 3)),
+                     rep(weights[3], (length(target_features) / 3)))
 
   if("experiment" %in% model.df_current)
   {

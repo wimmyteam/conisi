@@ -10,6 +10,8 @@
 #'   the numbers in each compartment at a given time.
 #' @param pop Integer The size of the modeled population
 #'
+#' @param pop_prop Vector This vector contains population proportions for sub-populations
+#'
 #' @param start_date Date This is the start date for the local epidemic and it is used for adding a
 #'   date column to the output.
 #'
@@ -20,7 +22,7 @@
 #'
 #' @importFrom magrittr %>%
 
-mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
+mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag = 0) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
@@ -32,8 +34,8 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
   # Do we need to create a date variable
   if(!is.null(start_date)){
 
-  df <- df %>%
-    dplyr::mutate(date = start_date + time + report_lag)
+    df <- df %>%
+      dplyr::mutate(date = start_date + time + report_lag)
 
   }
 
@@ -182,20 +184,30 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                   theta_cumul_flow = theta_cumul_flow1 + theta_cumul_flow2 + theta_cumul_flow3,
                   Symp_diagnozed_cumul_flow = Symp_diagnozed_cumul_flow1 + Symp_diagnozed_cumul_flow2 + Symp_diagnozed_cumul_flow3,
                   Asymp_diagnozed_cumul_flow = Asymp_diagnozed_cumul_flow1 + Asymp_diagnozed_cumul_flow2 + Asymp_diagnozed_cumul_flow3,
+                  Symp_inf_cumul_flow = Symp_inf_cumul_flow1 + Symp_inf_cumul_flow2 + Symp_inf_cumul_flow3,
                   ReturnWork_cumul_flow = ReturnWork_cumul_flow1 + ReturnWork_cumul_flow2 + ReturnWork_cumul_flow3,
                   H = H1 + H2 + H3,
                   P = P1 + P2 + P3,
                   C = C1 + C2 + C3,
                   I_sd = I_sd1 + I_sd2 + I_sd3,
-                  Fully_vaccinated = V1 + V2 + V3,
+                  AllVaccinations1 = Vaccination_dose1_flow1 + Vaccination_fully_flow1,
+                  AllVaccinations2 = Vaccination_dose1_flow2 + Vaccination_fully_flow2,
+                  AllVaccinations3 = Vaccination_dose1_flow3 + Vaccination_fully_flow3,
+                  AllVaccinations = AllVaccinations1 + AllVaccinations2 + AllVaccinations3,
+                  Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
+                  FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
                   Prevalence1 = ActiveInfections1 / (pop_prop[1] * pop),
-                  Prevalence2 = ActiveInfections1 / (pop_prop[2] * pop),
-                  Prevalence3 = ActiveInfections1 / (pop_prop[3] * pop),
+                  Prevalence2 = ActiveInfections2 / (pop_prop[2] * pop),
+                  Prevalence3 = ActiveInfections3 / (pop_prop[3] * pop),
                   Prevalence = ActiveInfections / pop,
                   Exposure1 = ContribAll1 / (pop_prop[1] * pop),
                   Exposure2 = ContribAll2 / (pop_prop[2] * pop),
                   Exposure3 = ContribAll3 / (pop_prop[3] * pop),
                   Exposure = ContribAll / pop,
+                  Susceptible1 = S1 / (pop_prop[1] * pop),
+                  Susceptible2 = S2 / (pop_prop[2] * pop),
+                  Susceptible3 = S3 / (pop_prop[3] * pop),
+                  Susceptible = (S1 + S2 + S3) / pop,
                   FracSymptKnown1 = fraction(SymptKnownInfections1, ActiveInfections1),
                   FracSymptKnown2 = fraction(SymptKnownInfections2, ActiveInfections2),
                   FracSymptKnown3 = fraction(SymptKnownInfections3, ActiveInfections3),
@@ -253,6 +265,10 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                   NewDeaths2 = AllDeaths2 - lag(AllDeaths2, default = 0),
                   NewDeaths3 = AllDeaths3 - lag(AllDeaths3, default = 0),
                   NewDeaths = AllDeaths - lag(AllDeaths, default = 0),
+                  NewVaccinations1 = AllVaccinations1 - lag(AllVaccinations1, default = 0),
+                  NewVaccinations2 = AllVaccinations2 - lag(AllVaccinations2, default = 0),
+                  NewVaccinations3 = AllVaccinations3 - lag(AllVaccinations3, default = 0),
+                  NewVaccinations = AllVaccinations - lag(AllVaccinations, default = 0),
                   eta_d_flow1 = eta_d_cumul_flow1 - lag(eta_d_cumul_flow1, default = 0),
                   eta_d_flow2 = eta_d_cumul_flow2 - lag(eta_d_cumul_flow2, default = 0),
                   eta_d_flow3 = eta_d_cumul_flow3 - lag(eta_d_cumul_flow3, default = 0),
@@ -281,6 +297,10 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                   Asymp_diagnozed_flow2 = Asymp_diagnozed_cumul_flow2 - lag(Asymp_diagnozed_cumul_flow2, default = 0),
                   Asymp_diagnozed_flow3 = Asymp_diagnozed_cumul_flow3 - lag(Asymp_diagnozed_cumul_flow3, default = 0),
                   Asymp_diagnozed_flow = Asymp_diagnozed_cumul_flow - lag(Asymp_diagnozed_cumul_flow, default = 0),
+                  Symp_inf_flow1 = Symp_inf_cumul_flow1 - lag(Symp_inf_cumul_flow1, default = 0),
+                  Symp_inf_flow2 = Symp_inf_cumul_flow2 - lag(Symp_inf_cumul_flow2, default = 0),
+                  Symp_inf_flow3 = Symp_inf_cumul_flow3 - lag(Symp_inf_cumul_flow3, default = 0),
+                  Symp_inf_flow = Symp_inf_cumul_flow - lag(Symp_inf_cumul_flow, default = 0),
                   ReturnWork_flow1 = ReturnWork_cumul_flow1 - lag(ReturnWork_cumul_flow1, default = 0),
                   ReturnWork_flow2 = ReturnWork_cumul_flow2 - lag(ReturnWork_cumul_flow2, default = 0),
                   ReturnWork_flow3 = ReturnWork_cumul_flow3 - lag(ReturnWork_cumul_flow3, default = 0),
@@ -294,6 +314,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                                           ActiveInfections, ActiveInfections1, ActiveInfections2, ActiveInfections3,
                                           Prevalence, Prevalence1, Prevalence2, Prevalence3,
                                           Exposure, Exposure1, Exposure2, Exposure3,
+                                          Susceptible, Susceptible1, Susceptible2, Susceptible3,
                                           SevereInfections, SevereInfections1, SevereInfections2, SevereInfections3,
                                           I_sd, I_sd1, I_sd2, I_sd3,
                                           Hospitalizations, Hospitalizations1, Hospitalizations2, Hospitalizations3,
@@ -306,6 +327,9 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                                           AsymptKnownInfections, AsymptKnownInfections1, AsymptKnownInfections2, AsymptKnownInfections3,
                                           AllDeaths, AllDeaths1, AllDeaths2, AllDeaths3,
                                           NewDeaths, NewDeaths1, NewDeaths2, NewDeaths3,
+                                          NewVaccinations, NewVaccinations1, NewVaccinations2, NewVaccinations3,
+                                          FullyVaccinated, Dose1Vaccinated,
+                                          AllVaccinations, AllVaccinations1, AllVaccinations2, AllVaccinations3,
                                           Hosp_I_sd, Hosp_I_sd1, Hosp_I_sd2, Hosp_I_sd3,
                                           Hosp_SevereInfections, Hosp_SevereInfections1, Hosp_SevereInfections2, Hosp_SevereInfections3,
                                           Hosp_SevereKnownMildInfections, Hosp_SevereKnownMildInfections1, Hosp_SevereKnownMildInfections2, Hosp_SevereKnownMildInfections3,
@@ -322,10 +346,11 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0) {
                                           theta_flow, theta_flow1, theta_flow2, theta_flow3,
                                           Symp_diagnozed_flow, Symp_diagnozed_flow1, Symp_diagnozed_flow2, Symp_diagnozed_flow3,
                                           Asymp_diagnozed_flow, Asymp_diagnozed_flow1, Asymp_diagnozed_flow2, Asymp_diagnozed_flow3,
-                                          ReturnWork_flow, ReturnWork_flow1, ReturnWork_flow2, ReturnWork_flow3,
-                                          Fully_vaccinated),
-                  .fns = list(mean = mean, min = min, max = max),
-                  .names = "{col}_{fn}")) %>%
+                                          Symp_inf_flow, Symp_inf_flow1, Symp_inf_flow2, Symp_inf_flow3,
+                                          ReturnWork_flow, ReturnWork_flow1, ReturnWork_flow2, ReturnWork_flow3
+    ),
+    .fns = list(mean = mean, min = min, max = max),
+    .names = "{col}_{fn}")) %>%
     dplyr::ungroup()
 
   #Prepend parameters with a "par_"

@@ -6,8 +6,8 @@
 #' @param parm_table A data frame containing the time-varying parameters (in long format).
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
-#' @param pop_prop A vector with population proportions for sub-population groups
-#' @param contact_matrix A vector with entries of the mixing matrix
+#' @param pop_prop Vector This vector contains population proportions for sub-populations
+#' @param contact_matrix Vector The entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments over time
 #'
@@ -15,8 +15,8 @@
 #' @export
 #'
 COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
-  #library(tidyverse)
-  #library(deSolve)
+  # library(tidyverse)
+  # library(deSolve)
 
   ngroups = length(pop_prop) # number of sub populations in the model
 
@@ -61,12 +61,14 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
          Asymp_diagnozed_cumul_flow = rep(0, ngroups), # Cumul flow of diagnoses that were asymptomatic (including presymptomatic) at time of diagnosis
          Symp_diagnozed_cumul_flow = rep(0, ngroups), # Cumul flow of diagnoses that were symptomatic at time of diagnosis
          Asymp_inf_cumul_flow = rep(0, ngroups), # Cumul flow of infections that stay symptomatic
-         Symp_inf_cumul_flow = rep(0, ngroups) # Cumul flow of infections that become symptomatic
+         Symp_inf_cumul_flow = rep(0, ngroups), # Cumul flow of infections that become symptomatic
+         Vaccination_dose1_flow = rep(0, ngroups),
+         Vaccination_fully_flow = rep(0, ngroups)
   )
 
   model <- function(t, y, parms){
 
-    ncompartment = 37 #25 in actual, rest are to track other things
+    ncompartment = 39 #25 in actual, rest are to track other things
     ngroups = length(y)/ncompartment
 
     S = as.matrix(y[1:ngroups])
@@ -106,6 +108,8 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
     Symp_diagnozed_cumul_flow = as.matrix(y[(34*ngroups+1):(35*ngroups)])
     Asymp_inf_cumul_flow = as.matrix(y[(35*ngroups+1):(36*ngroups)])
     Symp_inf_cumul_flow = as.matrix(y[(36*ngroups+1):(37*ngroups)])
+    Vaccination_dose1_flow = as.matrix(y[(37*ngroups+1):(38*ngroups)])
+    Vaccination_fully_flow = as.matrix(y[(38*ngroups+1):(39*ngroups)])
 
     parms <- parm_table %>%
       dplyr::filter((start_time <= t | is.na(start_time))& (t < end_time | is.na(end_time))) %>%
@@ -267,6 +271,8 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       Symp_diagnozed_flow <- I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
       Asymp_inf_flow <- I_1u_f_I_2u + I_1d_f_I_2d
       Symp_inf_flow <- I_1u_f_I_mu + I_1u_f_I_su + I_1d_f_I_md + I_1d_f_I_sd
+      dVaccination_dose1_flow <- S_f_V_1
+      dVaccination_fully_flow <- S_f_V + V_1_f_V
 
       return(list(c(dS,
                     dE_u,
@@ -304,10 +310,13 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
                     Asymp_diagnozed_flow,
                     Symp_diagnozed_flow,
                     Asymp_inf_flow,
-                    Symp_inf_flow)))
+                    Symp_inf_flow,
+                    dVaccination_dose1_flow,
+                    dVaccination_fully_flow)))
 
     })
   }
+
 
   tspan <- seq(0, num_days, 1)
 
