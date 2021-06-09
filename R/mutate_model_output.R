@@ -62,12 +62,12 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
                   K = a_sd * c_1sd * c_e1u * d_1 * r_2d * r_md + a_sd * c_1sd * d_e * r_2d * r_md * chi_u,
                   psi = a_1d * r_2d * r_md + a_2d * c_12d * r_md + a_md * c_1md * r_2d,
                   G = a_1d * d_1 * r_2d * r_md + a_1u * chi_d * r_2d * r_md + a_2d * c_12d * d_1 * r_md + a_md * c_1md * d_1 * r_2d,
-                  A = ((((d_e * psi * chi_u + c_e1u * G) * zeta_u +
-                           a_su * c_1su * c_e1u * chi_d * r_2d * r_md) * zeta_d +
-                          K * zeta_u  + a_sd * c_1su * c_e1u * chi_d * d_s * r_2d * r_md) * xi_m +
-                         c_e1u * c_1mu * r_2d * alpha_m * chi_d * zeta_u * zeta_d) * xi_2 +
-                    c_e1u * c_12u * r_md * alpha_2 * chi_d * xi_m * zeta_u * zeta_d,
-                  B = r_2d * r_md * chi_e * chi_u * chi_d * xi_2 * xi_m * zeta_u * zeta_d,
+                  # A = ((((d_e * psi * chi_u + c_e1u * G) * zeta_u +
+                  #          a_su * c_1su * c_e1u * chi_d * r_2d * r_md) * zeta_d +
+                  #         K * zeta_u  + a_sd * c_1su * c_e1u * chi_d * d_s * r_2d * r_md) * xi_m +
+                  #        c_e1u * c_1mu * r_2d * alpha_m * chi_d * zeta_u * zeta_d) * xi_2 +
+                  #   c_e1u * c_12u * r_md * alpha_2 * chi_d * xi_m * zeta_u * zeta_d,
+                  #B = r_2d * r_md * chi_e * chi_u * chi_d * xi_2 * xi_m * zeta_u * zeta_d,
                   #R0 = (b_a + b_b) * A / B,
                   #Reff = FOIadjust * R0 * (S / pop),
                   AllInfections1 = E_u1 + I_1u1 + I_2u1 + I_mu1 + I_su1 + E_d1 + I_1d1 + I_2d1 + I_md1 + I_sd1 + H1 + P1 + C1,
@@ -347,10 +347,9 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
                                           Symp_diagnozed_flow, Symp_diagnozed_flow1, Symp_diagnozed_flow2, Symp_diagnozed_flow3,
                                           Asymp_diagnozed_flow, Asymp_diagnozed_flow1, Asymp_diagnozed_flow2, Asymp_diagnozed_flow3,
                                           Symp_inf_flow, Symp_inf_flow1, Symp_inf_flow2, Symp_inf_flow3,
-                                          ReturnWork_flow, ReturnWork_flow1, ReturnWork_flow2, ReturnWork_flow3
-    ),
-    .fns = list(mean = mean, min = min, max = max),
-    .names = "{col}_{fn}")) %>%
+                                          ReturnWork_flow, ReturnWork_flow1, ReturnWork_flow2, ReturnWork_flow3),
+                                .fns = list(mean = mean, min = min, max = max),
+                                .names = "{col}_{fn}")) %>%
     dplyr::ungroup()
 
   #Prepend parameters with a "par_"
@@ -358,5 +357,4 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
     dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:upsilon | r_2d:d_e)
 
   return(df4)
-
 }
