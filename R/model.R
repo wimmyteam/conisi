@@ -353,8 +353,8 @@ model_result_extend <- function(mod_result, par_table) {
 #' @param parm_table A data frame containing the time-varying parameters (in long format).
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
-#' @param pop_prop A vector with population proportions for sub-population groups
-#' @param contact_matrix A vector with entries of the mixing matrix
+#' @param pop_prop Vector This vector contains population proportions for sub-populations
+#' @param contact_matrix Vector The entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments, parameters and other statistics over time
 #'
@@ -419,8 +419,8 @@ COVIDmodel_run_many <- function(parm_table, pop_size, num_days, pop_prop, contac
 #' @param parm_table A data frame containing the time-varying parameters (in long format) for multiple experiments.
 #' @param pop_size Integer The size of the population being modelled.
 #' @param num_days Integer How many days to run the simulation for.
-#' @param pop_prop A vector with population proportions for sub-population groups
-#' @param contact_matrix A vector with entries of the mixing matrix
+#' @param pop_prop Vector This vector contains population proportions for sub-populations
+#' @param contact_matrix Vector The entries of the mixing matrix
 #'
 #' @return A data frame with the values of the various compartments
 #'
