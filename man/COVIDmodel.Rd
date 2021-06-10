@@ -4,7 +4,7 @@
 \alias{COVIDmodel}
 \title{Runs the conisi COVID-19 model}
 \usage{
-COVIDmodel(parm_table, pop_size, num_days)
+COVIDmodel(parm_table, pop_size, num_days, initial_values = NULL)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format).}
@@ -12,6 +12,8 @@ COVIDmodel(parm_table, pop_size, num_days)
 \item{pop_size}{Integer The size of the population being modelled.}
 
 \item{num_days}{Integer How many days to run the simulation for.}
+
+\item{initial_values}{Named Vector The initial values of the compartments as at time = 0}
 }
 \value{
 A data frame with the values of the various compartments over time
