@@ -10,19 +10,19 @@
 #'   the numbers in each compartment at a given time.
 #' @param pop Integer The size of the modeled population
 #'
-#' @param pop_prop Vector This vector contains population proportions for sub-populations
-#'
 #' @param start_date Date This is the start date for the local epidemic and it is used for adding a
 #'   date column to the output.
 #'
 #' @param  report_lag Integer This is the number of days we assume pass between the infection and
 #'   when it is first reported.
 #'
+#' @param pop_prop Vector This vector contains population proportions for sub-populations
+#'
 #' @export
 #'
 #' @importFrom magrittr %>%
 
-mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag = 0) {
+mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0, pop_prop) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
@@ -34,8 +34,8 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
   # Do we need to create a date variable
   if(!is.null(start_date)){
 
-    df <- df %>%
-      dplyr::mutate(date = start_date + time + report_lag)
+  df <- df %>%
+    dplyr::mutate(date = start_date + time + report_lag)
 
   }
 
@@ -348,8 +348,8 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
                                           Asymp_diagnozed_flow, Asymp_diagnozed_flow1, Asymp_diagnozed_flow2, Asymp_diagnozed_flow3,
                                           Symp_inf_flow, Symp_inf_flow1, Symp_inf_flow2, Symp_inf_flow3,
                                           ReturnWork_flow, ReturnWork_flow1, ReturnWork_flow2, ReturnWork_flow3),
-                                .fns = list(mean = mean, min = min, max = max),
-                                .names = "{col}_{fn}")) %>%
+                  .fns = list(mean = mean, min = min, max = max),
+                  .names = "{col}_{fn}")) %>%
     dplyr::ungroup()
 
   #Prepend parameters with a "par_"
@@ -357,4 +357,5 @@ mutateModelOutput <- function(df, pop, pop_prop, start_date = NULL, report_lag =
     dplyr::rename_with(function(x){paste0("par_", x)}, a_1d:upsilon | r_2d:d_e)
 
   return(df4)
+
 }
