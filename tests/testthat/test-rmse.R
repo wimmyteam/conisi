@@ -18,7 +18,7 @@ test_that("rmse works", {
                     weights = c(1.0, 0.5, 1),
   )
 
-  expect_lt(abs(rmse - 0.31747), 0.0001)
+  expect_lt(abs(rmse - 0.3155476), 0.0001)
 
   smaller_target <- test_data %>%
     dplyr::filter(date >= "2020-04-01")
@@ -26,9 +26,9 @@ test_that("rmse works", {
   rmse <- modelrmse(modelOutput = mod_result,
                     start_date,
                     smaller_target,
-                    weights = c(1, 0.5)
+                    weights = c(1.0, 0.5, 1)
   )
-  expect_lt(abs(rmse - 0.358956), 0.0001)
+  expect_lt(abs(rmse - 0.356786), 0.0001)
 
   #TODO write more tests with varying start and end dates and with many experiments in single mod_result
   #TODO create test data with easily verifiable RMSE such as 1
