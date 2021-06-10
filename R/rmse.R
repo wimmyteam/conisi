@@ -6,7 +6,7 @@ se <- function(actual, predicted){
 }
 
 mse <- function(actual, predicted, weights = rep(1, length(actual))){
-  return(weighted.mean(x = se(actual, predicted), w = weights))
+  return(weighted.mean(x = se(actual, predicted), w = weights, na.rm = TRUE))
 }
 
 rmse <- function(actual, predicted, weights){
@@ -32,7 +32,7 @@ myrmse <- function(model.features, target.features, weights){
 modelrmse <- function(modelOutput,
                       start_date,
                       target_data,
-                      weights = c(1.0, 0.5, 0.8),
+                      weights = c(1.0, 0.5, 1),
                       under_report_factor = 1)
 {
   #TODO this function needs a rewrite badly
