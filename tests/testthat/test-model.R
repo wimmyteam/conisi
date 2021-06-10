@@ -29,7 +29,7 @@ test_that("Model helper functions work", {
       )
 
   mod_result_2 <- COVIDmodel_run_many(xparm_table, pop, 100, pop_prop, contact_matrix)
-  expect_length(mod_result_2, 118)
+  expect_length(mod_result_2, 168)
 
   mod_result_3 <- COVIDmodel_run_and_mutate_many(xparm_table, pop, 100, pop_prop, contact_matrix)
   expect_length(mod_result3, 875)
