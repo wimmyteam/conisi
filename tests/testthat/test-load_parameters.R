@@ -9,7 +9,7 @@ test_that("loading parameters works", {
 
   matching_cols <- intersect(expected_columns, names(parameters))
   expect_equal(expected_columns, matching_cols)
-  expect_equal(nrow(parameters), 48)
+  expect_equal(nrow(parameters), 94)
 
   foi_adjust <- dplyr::filter(parameters, parameter_name == "FOIadjust")
 
