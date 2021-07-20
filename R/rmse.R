@@ -22,8 +22,8 @@ myrmse <- function(model.features, target.features, weights){
 #' @param modelOutput results from the model
 #' @param start_date date The date which the first model time-point is being compared to.
 #' @param target_data Data frame The observed data that the model is targeted to match.
-#' @param weights Vector Vector of length 2 containing weights indicating the relative weighting to give cases and deaths.
-#'   For example  c(1.0, 0.5)
+#' @param weights Vector Vector of length 4 containing weights indicating the relative weighting to give cases, deaths, allvaccinations and fully vaccinated
+#'   For example  c(1.0, 0.5, 0.25, 0.25)
 #' @param under_report_factor fraction Estimated fraction of deaths that get reported as covid-19 deaths. This is deprecated and no longer used.
 #'   The estimated_deaths in the variable "cum_est_deaths" allows for adjusting the death reporting rates.
 #'
@@ -32,7 +32,7 @@ myrmse <- function(model.features, target.features, weights){
 modelrmse <- function(modelOutput,
                       start_date,
                       target_data,
-                      weights = c(1.0, 0.5, 1),
+                      weights = c(1.0, 0.5, 0.25, 0.25),
                       under_report_factor = 1)
 {
   #TODO this function needs a rewrite badly
@@ -65,29 +65,29 @@ modelrmse <- function(modelOutput,
 
   modelOutput <- dplyr::filter(modelOutput, time >= start_time & time <= end_time)
 
-  target_features <- c(target_data$cum_cases / tail(target_data$cum_cases, 1),
-                       target_data$cum_est_deaths / tail(target_data$cum_est_deaths, 1),
-                       target_data$cum_vaccinations / tail(target_data$cum_vaccinations, 1))
+  target_features <- c(target_data$smoothed_new_cases,
+                       target_data$smoothed_daily_est_deaths,
+                       target_data$smoothed_daily_vaccinations,
+                       target_data$smoothed_daily_fully_vaccinated)
 
   target_features[is.na(target_features)] <- 0
 
   model.df_current <- modelOutput %>%
     dplyr::mutate(AllDeaths = D_s1 + D_h1 + D_c1 + D_s2 + D_h2 + D_c2 + D_s3 + D_h3 + D_c3,
-#           local_epi_start_date = local_epi_start_date_0,
-           date = date_zero + time)
-
-  model.df_current <- model.df_current %>%
-    dplyr::filter(date >= start_date & date <= max(target_data$date))
-
-  model.df_current <- model.df_current %>%
-    dplyr::mutate(ConfirmedCases = ConfirmedCases1 + ConfirmedCases2 + ConfirmedCases3,
+                  ConfirmedCases = ConfirmedCases1 + ConfirmedCases2 + ConfirmedCases3,
                   Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
                   FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
                   AllVaccinations = Dose1Vaccinated + FullyVaccinated,
-                  ConfirmedCasesRescaled = ConfirmedCases / tail(target_data$cum_cases, 1),
-                  AllDeathsRescaled = AllDeaths / tail(target_data$cum_est_deaths, 1),
-                  AllVaccinationsRescaled = AllVaccinations / tail(target_data$cum_vaccinations, 1))
-
+                  NewDeaths = AllDeaths - lag(AllDeaths),
+                  NewCases = ConfirmedCases - lag(ConfirmedCases),
+                  NewVaccinations = AllVaccinations - lag(AllVaccinations),
+                  NewDose1Vaccinated = Dose1Vaccinated - lag(Dose1Vaccinated),
+                  NewFullyVaccinated = FullyVaccinated - lag(FullyVaccinated),
+                  date = date_zero + time) %>%
+    dplyr::filter(date >= start_date & date <= max(target_data$date)) %>%
+    dplyr::mutate(ConfirmedCasesRescaled = NewCases,
+                  AllDeathsRescaled = NewDeaths,
+                  AllVaccinationsRescaled = NewVaccinations)
 
   if(under_report_factor != 1) {
     model.df_current <- model.df_current %>%
@@ -99,21 +99,24 @@ modelrmse <- function(modelOutput,
     model.df_current <- model.df_current %>%
       dplyr::arrange(experiment, time) %>%
       dplyr::group_by(experiment) %>%
-      dplyr::select(experiment, time, ConfirmedCasesRescaled, AllDeathsRescaled, AllVaccinationsRescaled) %>%
+      dplyr::select(experiment, time, ConfirmedCasesRescaled,
+                    AllDeathsRescaled, AllVaccinationsRescaled, NewFullyVaccinated) %>%
       dplyr::ungroup()
   } else {
     model.df_current <- model.df_current %>%
       dplyr::arrange(time) %>%
-      dplyr::select(time, ConfirmedCasesRescaled, AllDeathsRescaled, AllVaccinationsRescaled)
+      dplyr::select(experiment, time, ConfirmedCasesRescaled,
+                    AllDeathsRescaled, AllVaccinationsRescaled, NewFullyVaccinated)
   }
 
   model_current_wider.df <- model.df_current %>%
     tidyr::pivot_wider(names_from = "time",
-                values_from = c("ConfirmedCasesRescaled", "AllDeathsRescaled", "AllVaccinationsRescaled"))
+                       values_from = c("ConfirmedCasesRescaled", "AllDeathsRescaled", "AllVaccinationsRescaled", "NewFullyVaccinated"))
 
-  weight_vector <- c(rep(weights[1], (length(target_features) / 3)),
-                     rep(weights[2], (length(target_features) / 3)),
-                     rep(weights[3], (length(target_features) / 3)))
+  weight_vector <- c(rep(weights[1], (length(target_features) / 4)),
+                     rep(weights[2], (length(target_features) / 4)),
+                     rep(weights[3], (length(target_features) / 4)),
+                     rep(weights[4], (length(target_features) / 4)))
 
   if("experiment" %in% model.df_current)
   {
@@ -130,4 +133,8 @@ modelrmse <- function(modelOutput,
                         weight_vector)
   }
   return(model_rmse)
+
+  nrmse <- model_rmse/weighted.mean(x = target_features, w = weight_vector)
+  #nrmse <- model_rmse/sqrt(Hmisc::wtd.var(x = target_features, w = weight_vector))
+  return(nrmse)
 }
