@@ -4,7 +4,13 @@
 \alias{COVIDmodel_run_and_mutate}
 \title{Runs the conisi COVID-19 model and applies mutate_model to the result}
 \usage{
-COVIDmodel_run_and_mutate(parm_table, pop_size, num_days, start_date = NULL)
+COVIDmodel_run_and_mutate(
+  parm_table,
+  pop_size,
+  num_days,
+  pop_prop,
+  contact_matrix
+)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format).}
@@ -12,6 +18,10 @@ COVIDmodel_run_and_mutate(parm_table, pop_size, num_days, start_date = NULL)
 \item{pop_size}{Integer The size of the population being modelled.}
 
 \item{num_days}{Integer How many days to run the simulation for.}
+
+\item{pop_prop}{Vector This vector contains population proportions for sub-populations}
+
+\item{contact_matrix}{Vector The entries of the mixing matrix}
 }
 \value{
 A data frame with the values of the various compartments, parameters and other statistics over time

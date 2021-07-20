@@ -8,7 +8,7 @@ modelrmse(
   modelOutput,
   start_date,
   target_data,
-  weights = c(1, 0.5),
+  weights = c(1, 0.5, 0.25, 0.25),
   under_report_factor = 1
 )
 }
@@ -19,8 +19,8 @@ modelrmse(
 
 \item{target_data}{Data frame The observed data that the model is targeted to match.}
 
-\item{weights}{Vector Vector of length 2 containing weights indicating the relative weighting to give cases and deaths.
-For example  c(1.0, 0.5)}
+\item{weights}{Vector Vector of length 4 containing weights indicating the relative weighting to give cases, deaths, allvaccinations and fully vaccinated
+For example  c(1.0, 0.5, 0.25, 0.25)}
 
 \item{under_report_factor}{fraction Estimated fraction of deaths that get reported as covid-19 deaths. This is deprecated and no longer used.
 The estimated_deaths in the variable "cum_est_deaths" allows for adjusting the death reporting rates.}

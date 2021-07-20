@@ -6,7 +6,7 @@
 and creates new variables that are needed for metrics of interest. The
 output from this function is another dataframe / tibble.}
 \usage{
-mutate_model_output(df, pop, start_date = NULL, report_lag = 0)
+mutate_model_output(df, pop, start_date = NULL, report_lag = 0, pop_prop)
 }
 \arguments{
 \item{df}{Dataframe Output from COVIDmodel. The input data frame must have a row that represents
@@ -22,6 +22,8 @@ date column to the output.}
 
 \item{report_lag}{Integer This is the number of days we assume pass between the infection and
 when it is first reported.}
+
+\item{pop_prop}{Vector This vector contains population proportions for sub-populations}
 }
 \description{
 This function processes the model output

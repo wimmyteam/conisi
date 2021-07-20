@@ -4,7 +4,7 @@
 \alias{COVIDmodel_run_many}
 \title{Runs the conisi COVID-19 model on multiple parameter sets at once}
 \usage{
-COVIDmodel_run_many(parm_table, pop_size, num_days)
+COVIDmodel_run_many(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format) for multiple experiments.}
@@ -12,6 +12,10 @@ COVIDmodel_run_many(parm_table, pop_size, num_days)
 \item{pop_size}{Integer The size of the population being modelled.}
 
 \item{num_days}{Integer How many days to run the simulation for.}
+
+\item{pop_prop}{A vector with population proportions for sub-population groups}
+
+\item{contact_matrix}{A vector with entries of the mixing matrix}
 }
 \value{
 A data frame with the values of the various compartments, parameters and other statistics over time
