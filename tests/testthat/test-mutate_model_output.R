@@ -22,6 +22,6 @@ test_that("mutate_model_output works", {
 
   mod_result <- conisi::mutate_model_output(mod_result, pop, start_date = NULL, report_lag = 0, pop_prop)
 
-  expect_length(mod_result, 875)
+  expect_length(mod_result, 884)
 
 })
