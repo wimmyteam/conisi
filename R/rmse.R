@@ -78,11 +78,11 @@ modelrmse <- function(modelOutput,
                   Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
                   FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
                   AllVaccinations = Dose1Vaccinated + FullyVaccinated,
-                  NewDeaths = AllDeaths - lag(AllDeaths),
-                  NewCases = ConfirmedCases - lag(ConfirmedCases),
-                  NewVaccinations = AllVaccinations - lag(AllVaccinations),
-                  NewDose1Vaccinated = Dose1Vaccinated - lag(Dose1Vaccinated),
-                  NewFullyVaccinated = FullyVaccinated - lag(FullyVaccinated),
+                  NewDeaths = AllDeaths - dplyr::lag(AllDeaths),
+                  NewCases = ConfirmedCases - dplyr::lag(ConfirmedCases),
+                  NewVaccinations = AllVaccinations - dplyr::lag(AllVaccinations),
+                  NewDose1Vaccinated = Dose1Vaccinated - dplyr::lag(Dose1Vaccinated),
+                  NewFullyVaccinated = FullyVaccinated - dplyr::lag(FullyVaccinated),
                   date = date_zero + time) %>%
     dplyr::filter(date >= start_date & date <= max(target_data$date)) %>%
     dplyr::mutate(ConfirmedCasesRescaled = NewCases,
@@ -94,7 +94,7 @@ modelrmse <- function(modelOutput,
       mutate(AllDeathsRescaled = AllDeathsRescaled * under_report_factor)
   }
 
-  if("experiment" %in% model.df_current)
+  if("experiment" %in% colnames(model.df_current))
   {
     model.df_current <- model.df_current %>%
       dplyr::arrange(experiment, time) %>%
@@ -118,7 +118,7 @@ modelrmse <- function(modelOutput,
                      rep(weights[3], (length(target_features) / 4)),
                      rep(weights[4], (length(target_features) / 4)))
 
-  if("experiment" %in% model.df_current)
+  if("experiment" %in% colnames(model.df_current))
   {
     model_rmse <- apply(dplyr::select(model_current_wider.df, -experiment),
                         MARGIN = 1,
@@ -132,7 +132,6 @@ modelrmse <- function(modelOutput,
                         target_features,
                         weight_vector)
   }
-  return(model_rmse)
 
   nrmse <- model_rmse/weighted.mean(x = target_features, w = weight_vector)
   #nrmse <- model_rmse/sqrt(Hmisc::wtd.var(x = target_features, w = weight_vector))
