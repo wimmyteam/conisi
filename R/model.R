@@ -364,7 +364,7 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, 
 {
   mod_result <- COVIDmodel(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 
-  if(! "experiment" %in% parm_table){
+  if(! "experiment" %in% colnames(parm_table)){
     parm_table <- dplyr::mutate(parm_table, experiment = 1)
   }
 

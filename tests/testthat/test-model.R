@@ -16,9 +16,8 @@ test_that("Model helper functions work", {
   contact_matrix <- c(13.6, 10.69, 15.71,0.80, 4, 7.2, 0.80, 4.90, 4)
 
   mod_result <- COVIDmodel_run_and_mutate(par_table, pop, 100, pop_prop, contact_matrix)
-  #mod_result <- dplyr::mutate(mod_result, experiment = 1)
 
-  expect_length(mod_result, 875)
+  expect_length(mod_result, 884)
 
   availablecores <- 2
   doParallel::registerDoParallel(cores = availablecores)
@@ -32,5 +31,5 @@ test_that("Model helper functions work", {
   expect_length(mod_result_2, 167)
 
   mod_result_3 <- COVIDmodel_run_and_mutate_many(xparm_table, pop, 100, pop_prop, contact_matrix)
-  expect_length(mod_result_3, 875)
+  expect_length(mod_result_3, 884)
 })
