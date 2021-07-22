@@ -105,7 +105,7 @@ modelrmse <- function(modelOutput,
   } else {
     model.df_current <- model.df_current %>%
       dplyr::arrange(time) %>%
-      dplyr::select(experiment, time, ConfirmedCasesRescaled,
+      dplyr::select(time, ConfirmedCasesRescaled,
                     AllDeathsRescaled, AllVaccinationsRescaled, NewFullyVaccinated)
   }
 
