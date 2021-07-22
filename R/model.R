@@ -327,7 +327,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       model,
       c(100, 1000, 10000),
       #These are not actually used, just passing it because lsoda wants a vector
-      hmin = 1e-12, atol = 1e-6
+      rtol = 1e-5
     )
   )
   return(model_output)
