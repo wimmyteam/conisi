@@ -229,9 +229,9 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       S_f_V <- iota_1 * psi * alpha * S
       S_f_V_1 <- iota_2 * psi_d1 * alpha_d1 * S
       V_1_f_V <- iota_2 * psi_d2 * alpha_d2 * V_1
-      V_1_f_E_u <- iota_2 * FOIadjust * (V_1 * q) * (CM %*% II) * (1 - alpha_d1) #assuming that probability of successful transmission to V_1 pop is reduced by 1/3
-      V_f_E_u_1 <- iota_1 * FOIadjust * (V * q) * (CM %*% II) * (1 - alpha) #assuming that probability of successful transmission to V pop is reduced by 1/9
-      V_f_E_u_2 <- iota_2 * FOIadjust * (V * q)*  (CM %*% II) * (1 - alpha_d2) #assuming that probability of successful transmission to V pop is reduced by 1/9
+      V_1_f_E_u <- iota_2 * FOIadjust * (V_1 * q/3) * (CM %*% II) * (1 - alpha_d1) #assuming that probability of successful transmission to V_1 pop is reduced by 1/3
+      V_f_E_u_1 <- iota_1 * FOIadjust * (V * q/9) * (CM %*% II) * (1 - alpha) #assuming that probability of successful transmission to V pop is reduced by 1/9
+      V_f_E_u_2 <- iota_2 * FOIadjust * (V * q/9)*  (CM %*% II) * (1 - alpha_d2) #assuming that probability of successful transmission to V pop is reduced by 1/9
 
       # Defining the system of differential equations
       dS <- -S_f_E_u + R_2u_f_S + R_2d_f_S + R_mu_f_S + R_md_f_S + R_h_f_S + R_c_f_S - S_f_V - S_f_V_1
