@@ -121,7 +121,8 @@ modelrmse <- function(modelOutput,
   # model_current_wider.df <- model.df_current %>%
   #   tidyr::pivot_wider(names_from = "time",
   #                      values_from = c("ConfirmedCasesRescaled", "AllDeathsRescaled", "AllVaccinationsRescaled", "FullyVaccinatedRescaled"))
-
+  if("experiment" %in% colnames(model.df_current))
+  {
   model_cases_current_wider.df <- model.df_current %>% dplyr::select(experiment, time, ConfirmedCasesRescaled) %>%
     tidyr::pivot_wider(names_from = "time", values_from = c("ConfirmedCasesRescaled"))
   model_deaths_current_wider.df <- model.df_current %>% dplyr::select(experiment, time, AllDeathsRescaled) %>%
@@ -130,7 +131,16 @@ modelrmse <- function(modelOutput,
     tidyr::pivot_wider(names_from = "time", values_from = c("AllVaccinationsRescaled"))
   model_fully_vaccinated_current_wider.df <- model.df_current %>% dplyr::select(experiment, time, FullyVaccinatedRescaled) %>%
     tidyr::pivot_wider(names_from = "time", values_from = c("FullyVaccinatedRescaled"))
-
+  } else {
+    model_cases_current_wider.df <- model.df_current %>% dplyr::select(time, ConfirmedCasesRescaled) %>%
+      tidyr::pivot_wider(names_from = "time", values_from = c("ConfirmedCasesRescaled"))
+    model_deaths_current_wider.df <- model.df_current %>% dplyr::select(time, AllDeathsRescaled) %>%
+      tidyr::pivot_wider(names_from = "time", values_from = c("AllDeathsRescaled"))
+    model_all_vaccinations_current_wider.df <- model.df_current %>% dplyr::select(time, AllVaccinationsRescaled) %>%
+      tidyr::pivot_wider(names_from = "time", values_from = c("AllVaccinationsRescaled"))
+    model_fully_vaccinated_current_wider.df <- model.df_current %>% dplyr::select(time, FullyVaccinatedRescaled) %>%
+      tidyr::pivot_wider(names_from = "time", values_from = c("FullyVaccinatedRescaled"))
+  }
 
   # weight vectors
   # weight_vector <- c(rep(weights[1], (length(target_features) / 4)),
