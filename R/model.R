@@ -355,12 +355,14 @@ model_result_extend <- function(mod_result, par_table) {
 #' @param num_days Integer How many days to run the simulation for.
 #' @param pop_prop Vector This vector contains population proportions for sub-populations
 #' @param contact_matrix Vector The entries of the mixing matrix
+#' @param start_date Date This is the start date for the local epidemic and it is used for adding a date column to the output.
+#' @param  report_lag Integer This is the number of days we assume pass between the infection and when it is first reported.
 #'
 #' @return A data frame with the values of the various compartments, parameters and other statistics over time
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
+COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, start_date = NULL, report_lag = 0)
 {
   mod_result <- COVIDmodel(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 
@@ -377,7 +379,7 @@ COVIDmodel_run_and_mutate <- function(parm_table, pop_size, num_days, pop_prop, 
     dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
     tidyr::fill(everything(), .direction = "down")
 
-  mod_result <- conisi::mutate_model_output(mod_result, pop_size, start_date = NULL, report_lag = 0, pop_prop)
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size, start_date, report_lag, pop_prop)
 
   return(mod_result)
 }
@@ -421,13 +423,14 @@ COVIDmodel_run_many <- function(parm_table, pop_size, num_days, pop_prop, contac
 #' @param num_days Integer How many days to run the simulation for.
 #' @param pop_prop Vector This vector contains population proportions for sub-populations
 #' @param contact_matrix Vector The entries of the mixing matrix
-#'
+#' @param start_date Date This is the start date for the local epidemic and it is used for adding a date column to the output.
+#' @param  report_lag Integer This is the number of days we assume pass between the infection and when it is first reported.
 #' @return A data frame with the values of the various compartments
 #'
 #' @export
 #'
-COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
+COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, start_date = NULL, report_lag = 0){
   mod_result <- COVIDmodel_run_many(parm_table, pop_size, num_days, pop_prop, contact_matrix)
   # conisi::mutate_model_output(mod_result, pop_size)
-  mutate_model_output(mod_result, pop_size, start_date = NULL, report_lag = 0, pop_prop)
+  mutate_model_output(mod_result, pop_size, start_date, report_lag, pop_prop)
 }
