@@ -20,7 +20,7 @@ test_that("mutate_model_output works", {
     dplyr::left_join(par_df_wide, by = c("time" = "start_time")) %>%
     tidyr::fill(everything(), .direction = "down")
 
-  mod_result <- conisi::mutate_model_output(mod_result, pop, start_date = NULL, report_lag = 0, pop_prop)
+  mod_result <- conisi::mutate_model_output(mod_result, pop_size = pop, start_date = NULL, report_lag = 0, pop_prop)
 
   expect_length(mod_result, 884)
 
