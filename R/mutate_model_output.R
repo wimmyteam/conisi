@@ -8,7 +8,7 @@
 #'   time point within the experiment. The columns must contain the parameter combinations that
 #'   were used for each experiment and time point, as well as basic model output showing
 #'   the numbers in each compartment at a given time.
-#' @param pop Integer The size of the modeled population
+#' @param pop_size Integer The size of the modeled population
 #'
 #' @param start_date Date This is the start date for the local epidemic and it is used for adding a
 #'   date column to the output.
@@ -22,7 +22,7 @@
 #'
 #' @importFrom magrittr %>%
 
-mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0, pop_prop) {
+mutate_model_output <- function(df, pop_size, start_date = NULL, report_lag = 0, pop_prop) {
 
   # used the calculate fractions without creating NaN values.
   # return NA for 0/0
@@ -69,7 +69,7 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0, pop_
                   #   c_e1u * c_12u * r_md * alpha_2 * chi_d * xi_m * zeta_u * zeta_d,
                   #B = r_2d * r_md * chi_e * chi_u * chi_d * xi_2 * xi_m * zeta_u * zeta_d,
                   #R0 = (b_a + b_b) * A / B,
-                  #Reff = FOIadjust * R0 * (S / pop),
+                  #Reff = FOIadjust * R0 * (S / pop_size),
                   AllInfections1 = E_u1 + I_1u1 + I_2u1 + I_mu1 + I_su1 + E_d1 + I_1d1 + I_2d1 + I_md1 + I_sd1 + H1 + P1 + C1,
                   AllInfections2 = E_u2 + I_1u2 + I_2u2 + I_mu2 + I_su2 + E_d2 + I_1d2 + I_2d2 + I_md2 + I_sd2 + H2 + P2 + C2,
                   AllInfections3 = E_u3 + I_1u3 + I_2u3 + I_mu3 + I_su3 + E_d3 + I_1d3 + I_2d3 + I_md3 + I_sd3 + H3 + P3 + C3,
@@ -196,18 +196,18 @@ mutate_model_output <- function(df, pop, start_date = NULL, report_lag = 0, pop_
                   AllVaccinations = AllVaccinations1 + AllVaccinations2 + AllVaccinations3,
                   Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
                   FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
-                  Prevalence1 = ActiveInfections1 / (pop_prop[1] * pop),
-                  Prevalence2 = ActiveInfections2 / (pop_prop[2] * pop),
-                  Prevalence3 = ActiveInfections3 / (pop_prop[3] * pop),
-                  Prevalence = ActiveInfections / pop,
-                  Exposure1 = ContribAll1 / (pop_prop[1] * pop),
-                  Exposure2 = ContribAll2 / (pop_prop[2] * pop),
-                  Exposure3 = ContribAll3 / (pop_prop[3] * pop),
-                  Exposure = ContribAll / pop,
-                  Susceptible1 = S1 / (pop_prop[1] * pop),
-                  Susceptible2 = S2 / (pop_prop[2] * pop),
-                  Susceptible3 = S3 / (pop_prop[3] * pop),
-                  Susceptible = (S1 + S2 + S3) / pop,
+                  Prevalence1 = ActiveInfections1 / (pop_prop[1] * pop_size),
+                  Prevalence2 = ActiveInfections2 / (pop_prop[2] * pop_size),
+                  Prevalence3 = ActiveInfections3 / (pop_prop[3] * pop_size),
+                  Prevalence = ActiveInfections / pop_size,
+                  Exposure1 = ContribAll1 / (pop_prop[1] * pop_size),
+                  Exposure2 = ContribAll2 / (pop_prop[2] * pop_size),
+                  Exposure3 = ContribAll3 / (pop_prop[3] * pop_size),
+                  Exposure = ContribAll / pop_size,
+                  Susceptible1 = S1 / (pop_prop[1] * pop_size),
+                  Susceptible2 = S2 / (pop_prop[2] * pop_size),
+                  Susceptible3 = S3 / (pop_prop[3] * pop_size),
+                  Susceptible = (S1 + S2 + S3) / pop_size,
                   FracSymptKnown1 = fraction(SymptKnownInfections1, ActiveInfections1),
                   FracSymptKnown2 = fraction(SymptKnownInfections2, ActiveInfections2),
                   FracSymptKnown3 = fraction(SymptKnownInfections3, ActiveInfections3),
