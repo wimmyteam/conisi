@@ -50,6 +50,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
          D_c = rep(0, ngroups),
          V_1 = rep(0, ngroups),
          V = rep(0, ngroups),
+         E_uv = rep(0, ngroups),
          ConfirmedCases = rep(0, ngroups),
          ContribAll = rep(0, ngroups),
          ContribNonSympt = rep(0, ngroups),
@@ -68,7 +69,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 
   model <- function(t, y, parms){
 
-    ncompartment = 39 #25 in actual, rest are to track other things
+    ncompartment = 40 #25 in actual, rest are to track other things
     ngroups = length(y)/ncompartment
 
     S = as.matrix(y[1:ngroups])
@@ -96,20 +97,21 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
     D_c = as.matrix(y[(22*ngroups+1):(23*ngroups)])
     V_1 = as.matrix(y[(23*ngroups+1):(24*ngroups)])
     V = as.matrix(y[(24*ngroups+1):(25*ngroups)])
-    ConfirmedCases = as.matrix(y[(25*ngroups+1):(26*ngroups)])
-    ContribAll = as.matrix(y[(26*ngroups+1):(27*ngroups)])
-    ContribNonSympt = as.matrix(y[(27*ngroups+1):(28*ngroups)])
-    eta_d_cumul_flow = as.matrix(y[(28*ngroups+1):(29*ngroups)])
-    eta_u_cumul_flow = as.matrix(y[(29*ngroups+1):(30*ngroups)])
-    r_h_cumul_flow = as.matrix(y[(30*ngroups+1):(31*ngroups)])
-    delta_h_cumul_flow = as.matrix(y[(31*ngroups+1):(32*ngroups)])
-    theta_cumul_flow = as.matrix(y[(32*ngroups+1):(33*ngroups)])
-    Asymp_diagnozed_cumul_flow = as.matrix(y[(33*ngroups+1):(34*ngroups)])
-    Symp_diagnozed_cumul_flow = as.matrix(y[(34*ngroups+1):(35*ngroups)])
-    Asymp_inf_cumul_flow = as.matrix(y[(35*ngroups+1):(36*ngroups)])
-    Symp_inf_cumul_flow = as.matrix(y[(36*ngroups+1):(37*ngroups)])
-    Vaccination_dose1_flow = as.matrix(y[(37*ngroups+1):(38*ngroups)])
-    Vaccination_fully_flow = as.matrix(y[(38*ngroups+1):(39*ngroups)])
+    E_uv = as.matrix(y[(25*ngroups+1):(26*ngroups)])
+    ConfirmedCases = as.matrix(y[(26*ngroups+1):(27*ngroups)])
+    ContribAll = as.matrix(y[(27*ngroups+1):(28*ngroups)])
+    ContribNonSympt = as.matrix(y[(28*ngroups+1):(29*ngroups)])
+    eta_d_cumul_flow = as.matrix(y[(29*ngroups+1):(30*ngroups)])
+    eta_u_cumul_flow = as.matrix(y[(30*ngroups+1):(31*ngroups)])
+    r_h_cumul_flow = as.matrix(y[(31*ngroups+1):(32*ngroups)])
+    delta_h_cumul_flow = as.matrix(y[(32*ngroups+1):(33*ngroups)])
+    theta_cumul_flow = as.matrix(y[(33*ngroups+1):(34*ngroups)])
+    Asymp_diagnozed_cumul_flow = as.matrix(y[(34*ngroups+1):(35*ngroups)])
+    Symp_diagnozed_cumul_flow = as.matrix(y[(35*ngroups+1):(36*ngroups)])
+    Asymp_inf_cumul_flow = as.matrix(y[(36*ngroups+1):(37*ngroups)])
+    Symp_inf_cumul_flow = as.matrix(y[(37*ngroups+1):(38*ngroups)])
+    Vaccination_dose1_flow = as.matrix(y[(38*ngroups+1):(39*ngroups)])
+    Vaccination_fully_flow = as.matrix(y[(39*ngroups+1):(40*ngroups)])
 
     parms <- parm_table %>%
       dplyr::filter((start_time <= t | is.na(start_time))& (t < end_time | is.na(end_time))) %>%
@@ -125,17 +127,6 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       hdf <- ifelse(exists("hdf"), hdf, 1.0) # Uses default value of 1 if parameter is missing
       ddf <- ifelse(exists("ddf"), ddf, 1.0) # Uses default value of 1 if parameter is missing
       upsilon <- ifelse(exists("upsilon"), upsilon, 0.0) # Uses default value of 0.0 if parameter is missing
-
-      # S_f_E_u <- (
-      #   a_1u * b_b * I_1u +
-      #     a_2u * b_b * I_2u +
-      #     1 * b_b * I_mu +
-      #     a_su * b_b * I_su +
-      #     a_1d * b_b * I_1d +
-      #     a_2d * b_b * I_2d +
-      #     a_md * b_b * I_md +
-      #     a_sd * b_b * I_sd
-      # ) * FOIadjust * S / pop_size
 
       II <- (a_1u * I_1u +
                a_2u * I_2u +
@@ -226,18 +217,32 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       R_c_f_S <- upsilon * R_c
 
       # Adding vaccination: flows from S to V_1 and V and from V_1 to V
-      S_f_V <- iota_1 * psi * alpha * S
-      S_f_V_1 <- iota_2 * psi_d1 * alpha_d1 * S
-      V_1_f_V <- iota_2 * psi_d2 * alpha_d2 * V_1
-      V_1_f_E_u <- iota_2 * FOIadjust * (V_1 * q/3) * (CM %*% II) * (1 - alpha_d1) #assuming that probability of successful transmission to V_1 pop is reduced by 1/3
-      V_f_E_u_1 <- iota_1 * FOIadjust * (V * q/9) * (CM %*% II) * (1 - alpha) #assuming that probability of successful transmission to V pop is reduced by 1/9
-      V_f_E_u_2 <- iota_2 * FOIadjust * (V * q/9)*  (CM %*% II) * (1 - alpha_d2) #assuming that probability of successful transmission to V pop is reduced by 1/9
+      S_f_V <- iota_1 * psi * S
+      S_f_V_1 <- iota_2 * psi_d1 * S
+      V_1_f_V <- iota_2 * psi_d2 * V_1
+      V_1_f_E_uv <- iota_2 * FOIadjust * (V_1 * q) * (CM %*% II) * (1 - alpha_d1)
+
+      c_s = dplyr::case_when(iota_1 == 1 & iota_2 == 0 ~ alpha,
+                             iota_1 == 0 & iota_2 == 1 ~ alpha_d2,
+                             iota_1 == 1 & iota_2 == 1 ~ (alpha + alpha_d2)/2,
+                             TRUE ~ 1)
+
+      V_f_E_uv <- FOIadjust * (V * q) * (CM %*% II) * (1 - c_s)
+
+      c_12uv = dplyr::case_when(iota_1 == 1 | iota_2 == 1 ~ c_12uv,
+                                TRUE ~ 0)
+
+      E_uv_f_I_2u <- c_12uv * E_uv
+
+      upsilon_v = dplyr::case_when(iota_1 == 1 | iota_2 == 1 ~ upsilon_v,
+                                TRUE ~ 0)
+      V_f_S <- upsilon_v * V
 
       # Defining the system of differential equations
-      dS <- -S_f_E_u + R_2u_f_S + R_2d_f_S + R_mu_f_S + R_md_f_S + R_h_f_S + R_c_f_S - S_f_V - S_f_V_1
-      dE_u <- -E_u_f_I_1u + S_f_E_u + V_1_f_E_u + V_f_E_u_1 + V_f_E_u_2
+      dS <- -S_f_E_u + R_2u_f_S + R_2d_f_S + R_mu_f_S + R_md_f_S + R_h_f_S + R_c_f_S - S_f_V - S_f_V_1 + V_f_S
+      dE_u <- -E_u_f_I_1u + S_f_E_u
       dI_1u <- -I_1u_f_I_2u - I_1u_f_I_mu - I_1u_f_I_su - I_1u_f_I_1d + E_u_f_I_1u
-      dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u
+      dI_2u <- -I_2u_f_R_2u - I_2u_f_I_2d + I_1u_f_I_2u + E_uv_f_I_2u
       dI_mu <- -I_mu_f_R_mu - I_mu_f_I_md + I_1u_f_I_mu
       dI_su <- -I_su_f_D_s - I_su_f_H - I_su_f_I_sd + I_1u_f_I_su
       dR_2u <- I_2u_f_R_2u - R_2u_f_S
@@ -257,8 +262,9 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
       dD_s <- I_su_f_D_s + I_sd_f_D_s
       dD_h <- H_f_D_h
       dD_c <- C_f_D_c
-      dV_1 <- S_f_V_1 - V_1_f_V - V_1_f_E_u
-      dV <- S_f_V + V_1_f_V - V_f_E_u_1 - V_f_E_u_2
+      dV_1 <- S_f_V_1 - V_1_f_V - V_1_f_E_uv
+      dV <- S_f_V + V_1_f_V - V_f_E_uv - V_f_S
+      dE_uv <- V_1_f_E_uv + V_f_E_uv - E_uv_f_I_2u
       dConfirmedCases <- I_1u_f_I_1d + I_2u_f_I_2d + I_mu_f_I_md + I_su_f_I_sd + I_su_f_H * hdf + I_su_f_D_s * ddf
       dContributionAll <- S_f_E_u
       dContributionNonSymptomatics <- ContribNonSympt # new infections caused by non-symptomatics
@@ -299,6 +305,7 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
                     dD_c,
                     dV_1,
                     dV,
+                    dE_uv,
                     dConfirmedCases,
                     dContributionAll,
                     dContributionNonSymptomatics,
