@@ -14,7 +14,7 @@
 #' @importFrom magrittr %>%
 #' @export
 #'
-COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix){
+COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, solver_method = "lsode"){
   # library(tidyverse)
   # library(deSolve)
 
@@ -328,13 +328,13 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix)
   tspan <- seq(0, num_days, 1)
 
   model_output <- as.data.frame(
-    deSolve::lsoda(
+    deSolve::ode(
       y,
       tspan,
       model,
       c(100, 1000, 10000),
-      #These are not actually used, just passing it because lsoda wants a vector
-      rtol = 1e-5
+      #These are not actually used, just passing it because "ode" wants a vector
+      method = solver_method
     )
   )
   return(model_output)

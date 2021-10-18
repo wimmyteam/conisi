@@ -1,0 +1,109 @@
+---
+title: "Conisi speedtest"
+author: "Matthys Kroon"
+date: "`r lubridate::today()`"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+# Sets the working directory for subsequent chunks, but not this chunk
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+
+
+# Speedtest for conisi model
+library(tidyverse)
+library(lubridate)
+library(cv19scenarios)
+library(deSolve)
+library(rlist)
+library(data.table)
+```
+
+```{r}
+scen <- get_scenario("sa", system.file("profile-data", package="conisi"))
+
+all_methods = c('lsoda', 'euler', 'lsode', 'lsodes', "lsodar","vode", "rk4", "ode23", "ode45", "bdf_d", "adams")
+
+all_results <- list()
+
+ref_result <- conisi::COVIDmodel(scen$params, scen$pop, 720, scen$pop_prop, scen$contact_matrix, solver_method = "lsoda") %>%
+  dplyr::mutate(AllDeaths = D_s1 + D_h1 + D_c1 + D_s2 + D_h2 + D_c2 + D_s3 + D_h3 + D_c3,
+                ConfirmedCases = ConfirmedCases1 + ConfirmedCases2 + ConfirmedCases3,
+                Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
+                FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
+                AllVaccinations = Dose1Vaccinated + FullyVaccinated,
+                NewDeaths = AllDeaths - dplyr::lag(AllDeaths),
+                NewCases = ConfirmedCases - dplyr::lag(ConfirmedCases),
+                NewVaccinations = AllVaccinations - dplyr::lag(AllVaccinations),
+                NewDose1Vaccinated = Dose1Vaccinated - dplyr::lag(Dose1Vaccinated),
+                NewFullyVaccinated = FullyVaccinated - dplyr::lag(FullyVaccinated)
+                )
+
+
+
+for (solver_method in all_methods){
+  print(solver_method)
+  start <- now()
+  mod_result <- conisi::COVIDmodel(scen$params, scen$pop, 720, scen$pop_prop, scen$contact_matrix, solver_method = solver_method)
+  end <- now()
+
+  time_taken <- end - start
+
+  mod_results <- mod_result %>%
+    dplyr::mutate(AllDeaths = D_s1 + D_h1 + D_c1 + D_s2 + D_h2 + D_c2 + D_s3 + D_h3 + D_c3,
+                  ConfirmedCases = ConfirmedCases1 + ConfirmedCases2 + ConfirmedCases3,
+                  Dose1Vaccinated = Vaccination_dose1_flow1 + Vaccination_dose1_flow2 + Vaccination_dose1_flow3,
+                  FullyVaccinated = Vaccination_fully_flow1 + Vaccination_fully_flow2 + Vaccination_fully_flow3,
+                  AllVaccinations = Dose1Vaccinated + FullyVaccinated,
+                  NewDeaths = AllDeaths - dplyr::lag(AllDeaths),
+                  NewCases = ConfirmedCases - dplyr::lag(ConfirmedCases),
+                  NewVaccinations = AllVaccinations - dplyr::lag(AllVaccinations),
+                  NewDose1Vaccinated = Dose1Vaccinated - dplyr::lag(Dose1Vaccinated),
+                  NewFullyVaccinated = FullyVaccinated - dplyr::lag(FullyVaccinated),
+                  solver_method = solver_method,
+                  time_taken = time_taken
+    )
+  all_results <- rlist::list.append(all_results, mod_results)
+}
+
+results <- rbindlist(all_results)
+```
+
+```{r summary_table}
+summary_table <- results %>%
+  group_by(solver_method) %>%
+  summarise(
+    mean_difference = mean(NewCases - ref_result$NewCases, na.rm = T),
+    time_taken = mean(time_taken)
+  ) %>%
+  ungroup()
+
+summary_table
+```
+s
+```{r cases_plot}
+ggplot(
+  results,
+  aes(x=time, y=NewCases)
+  ) +
+  ggtitle("Daily cases") +
+  geom_line(aes(color = solver_method))
+
+```
+
+```{r deaths_plot}
+ggplot(
+  results,
+  aes(x=time, y=NewDeaths)
+) +
+  ggtitle("Daily Deaths") +
+  geom_line(aes(color = solver_method))
+
+```
