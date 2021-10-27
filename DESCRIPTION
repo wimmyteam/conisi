@@ -24,7 +24,8 @@ Imports:
     magrittr,
     lubridate,
     foreach,
-    doParallel
+    doParallel,
+    data.table
 Suggests: 
     testthat,
     knitr,

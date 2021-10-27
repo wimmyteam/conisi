@@ -9,7 +9,9 @@ COVIDmodel_run_and_mutate(
   pop_size,
   num_days,
   pop_prop,
-  contact_matrix
+  contact_matrix,
+  start_date = NULL,
+  report_lag = 0
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ COVIDmodel_run_and_mutate(
 \item{pop_prop}{Vector This vector contains population proportions for sub-populations}
 
 \item{contact_matrix}{Vector The entries of the mixing matrix}
+
+\item{start_date}{Date This is the start date for the local epidemic and it is used for adding a date column to the output.}
+
+\item{report_lag}{Integer This is the number of days we assume pass between the infection and when it is first reported.}
 }
 \value{
 A data frame with the values of the various compartments, parameters and other statistics over time

@@ -8,15 +8,28 @@
 #' @param num_days Integer How many days to run the simulation for.
 #' @param pop_prop Vector This vector contains population proportions for sub-populations
 #' @param contact_matrix Vector The entries of the mixing matrix
+#' @param solver_method String The name of the solver method to use with deSolve. Default is euler.
+#' @param param_method String How the params should be prepared. Options are "step" and "linear-interpolation".
 #'
 #' @return A data frame with the values of the various compartments over time
 #'
 #' @importFrom magrittr %>%
+#' @import data.table
 #' @export
 #'
-COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, solver_method = "lsode"){
+COVIDmodel <- function(
+  parm_table,
+  pop_size,
+  num_days,
+  pop_prop,
+  contact_matrix,
+  solver_method = "euler",
+  param_method = "linear-interpolation")
+{
   # library(tidyverse)
   # library(deSolve)
+
+  tspan <- seq(0, num_days, 1)
 
   ngroups = length(pop_prop) # number of sub populations in the model
 
@@ -67,6 +80,8 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix,
          Vaccination_fully_flow = rep(0, ngroups)
   )
 
+  preppedParams <- prep_params(parm_table, tspan, param_method = param_method)
+
   model <- function(t, y, parms){
 
     ncompartment = 40 #25 in actual, rest are to track other things
@@ -113,8 +128,13 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix,
     Vaccination_dose1_flow = as.matrix(y[(38*ngroups+1):(39*ngroups)])
     Vaccination_fully_flow = as.matrix(y[(39*ngroups+1):(40*ngroups)])
 
-    parms <- parm_table %>%
-      dplyr::filter((start_time <= t | is.na(start_time))& (t < end_time | is.na(end_time))) %>%
+    # parms <- parm_table %>%
+    #   dplyr::filter((start_time <= t | is.na(start_time))& (t < end_time | is.na(end_time))) %>%
+    #   dplyr::select(parameter_name, value) %>%
+    #   tibble::deframe()
+    t_int <- as.integer(t)
+    parms <- preppedParams %>%
+      dplyr::filter(start_time == t_int) %>%
       dplyr::select(parameter_name, value) %>%
       tibble::deframe()
 
@@ -325,7 +345,6 @@ COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix,
   }
 
 
-  tspan <- seq(0, num_days, 1)
 
   model_output <- as.data.frame(
     deSolve::ode(
@@ -441,3 +460,41 @@ COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days, pop_p
   # conisi::mutate_model_output(mod_result, pop_size)
   mutate_model_output(mod_result, pop_size, start_date, report_lag, pop_prop)
 }
+
+prep_params <- function(parm_table, times, param_method = "linear-interpolation"){
+
+  linear_interpolated <- function(x){
+    i <- 0
+    l <- length(x)
+    while ( is.na(x[l - i]) & ( l - i > 0) ) {
+      i <- i + 1
+    }
+    x[l] <- x[l-i]
+    x <- approx(x, xout=times, rule=2)
+    return(x$y)
+  }
+
+  preppedParams <- parm_table %>%
+    dplyr::select(start_time, parameter_name, value) %>%
+    dplyr::mutate(start_time = ifelse(is.na(start_time), 0, start_time)) %>%
+    dplyr::filter(start_time <= max(times))
+
+  if(param_method == "step"){
+    preppedParams <- preppedParams %>%
+      dplyr::group_by(parameter_name) %>%
+      tidyr::complete(start_time = times) %>%
+      tidyr::fill(value, .direction = "down") %>%
+      dplyr::ungroup() %>%
+      dplyr::arrange(start_time)
+  } else if (param_method == "linear-interpolation"){
+    preppedParams <- preppedParams %>%
+      dplyr::group_by(parameter_name) %>%
+      tidyr::complete(start_time = times) %>%
+      dplyr::mutate(value = linear_interpolated(value))
+  }
+  preppedParams <- data.table::as.data.table(preppedParams)
+  data.table::setkey(preppedParams, start_time)
+  return(preppedParams)
+}
+
+

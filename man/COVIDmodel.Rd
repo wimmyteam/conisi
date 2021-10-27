@@ -4,7 +4,15 @@
 \alias{COVIDmodel}
 \title{Runs the conisi COVID-19 model}
 \usage{
-COVIDmodel(parm_table, pop_size, num_days, pop_prop, contact_matrix)
+COVIDmodel(
+  parm_table,
+  pop_size,
+  num_days,
+  pop_prop,
+  contact_matrix,
+  solver_method = "euler",
+  param_method = "linear-interpolation"
+)
 }
 \arguments{
 \item{parm_table}{A data frame containing the time-varying parameters (in long format).}
@@ -16,6 +24,10 @@ COVIDmodel(parm_table, pop_size, num_days, pop_prop, contact_matrix)
 \item{pop_prop}{Vector This vector contains population proportions for sub-populations}
 
 \item{contact_matrix}{Vector The entries of the mixing matrix}
+
+\item{solver_method}{String The name of the solver method to use with deSolve. Default is euler.}
+
+\item{param_method}{String How the params should be prepared. Options are "step" and "linear-interpolation".}
 }
 \value{
 A data frame with the values of the various compartments over time

@@ -6,7 +6,7 @@
 and creates new variables that are needed for metrics of interest. The
 output from this function is another dataframe / tibble.}
 \usage{
-mutate_model_output(df, pop, start_date = NULL, report_lag = 0, pop_prop)
+mutate_model_output(df, pop_size, start_date = NULL, report_lag = 0, pop_prop)
 }
 \arguments{
 \item{df}{Dataframe Output from COVIDmodel. The input data frame must have a row that represents
@@ -15,7 +15,7 @@ time point within the experiment. The columns must contain the parameter combina
 were used for each experiment and time point, as well as basic model output showing
 the numbers in each compartment at a given time.}
 
-\item{pop}{Integer The size of the modeled population}
+\item{pop_size}{Integer The size of the modeled population}
 
 \item{start_date}{Date This is the start date for the local epidemic and it is used for adding a
 date column to the output.}
