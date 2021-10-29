@@ -14,7 +14,7 @@
 #' @importFrom magrittr %>%
 #' @export
 #'
-COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, solver_method = "lsode"){
+COVIDmodel <- function(parm_table, pop_size, num_days, pop_prop, contact_matrix, solver_method = "euler"){
   # library(tidyverse)
   # library(deSolve)
 
