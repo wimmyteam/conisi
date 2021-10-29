@@ -461,6 +461,14 @@ COVIDmodel_run_and_mutate_many <- function(parm_table, pop_size, num_days, pop_p
   mutate_model_output(mod_result, pop_size, start_date, report_lag, pop_prop)
 }
 
+#' prep_params produces a timeseries of parameter values using the specified method
+#'
+#' @param parm_table data.frame The params as loaded using load_parameters()
+#' @param times vector of integer values for which to generate param values
+#' @param param_method char The method to use, one of "step", "linear-interpolation".
+#'
+#'@export
+#'
 prep_params <- function(parm_table, times, param_method = "linear-interpolation"){
 
   linear_interpolated <- function(x){
